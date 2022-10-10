@@ -17,7 +17,8 @@ class UserFactory(DjangoModelFactory):
     last_name = factory.Faker('last_name')
     bio = factory.Faker('sentence')
     date_of_birth =factory.Faker('date_time')
-    profile_picture = factory.Faker("image_url")
+    profile_picture = factory.Faker('image_url')
+    password = factory.PostGenerationMethodCall('set_password','defaultpassword')
 
 class ProjectFactory(DjangoModelFactory):
     class Meta:
