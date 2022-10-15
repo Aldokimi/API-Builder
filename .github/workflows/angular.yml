@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: |
           cd frontend/API-Builder-UI
-          npm run build -- --prod
+          npm run build
           
       - name: Lint
         run: |
@@ -57,7 +57,7 @@ jobs:
       - name: Test
         run: |
           cd frontend/API-Builder-UI
-          npm run test -- --prod
+          npm run test
           
       - name: Conventional Changelog Action
         id: changelog
