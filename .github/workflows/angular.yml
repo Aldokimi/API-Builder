@@ -45,10 +45,10 @@ jobs:
           cd frontend/API-Builder-UI
           npm run build
           
-      - name: Test
-        run: |
-          cd frontend/API-Builder-UI
-          npm run test
+#      - name: Test
+#        run: |
+#          cd frontend/API-Builder-UI
+#          npm run test
           
       - name: Conventional Changelog Action
         id: changelog
