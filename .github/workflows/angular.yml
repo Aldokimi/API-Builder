@@ -45,11 +45,6 @@ jobs:
           cd frontend/API-Builder-UI
           npm run build
           
-      - name: Lint
-        run: |
-          cd frontend/API-Builder-UI
-          npm run lint
-          
       - name: Test
         run: |
           cd frontend/API-Builder-UI
