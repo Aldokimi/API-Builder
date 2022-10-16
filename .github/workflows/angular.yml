@@ -1,8 +1,10 @@
 name: CD
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
 jobs:
   cd:
     concurrency: ci-${{ github.ref }}
@@ -18,11 +20,17 @@ jobs:
           node-version: lts/*
           cache: 'npm'
       - name: Install ⚙️
-        run: npm ci
+        run: |
+          cd frontend/API-Builder-UI
+          npm ci
       - name: Build 🛠
-        run: npm run build:ci
+        run: |
+          cd frontend/API-Builder-UI
+          npm run build:ci
       - name: Test 📋
-        run: npm run test:ci
+        run: |
+          cd frontend/API-Builder-UI
+          npm run test:ci
       - name: Publish 📢
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
