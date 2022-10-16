@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [14.x, 12.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -34,16 +34,24 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+            
       - name: Install Dependencies
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: |
+          cd frontend/API-Builder-UI
           npm ci
+          
       - name: Build
         run: |
-          npm run build -- --prod
+          cd frontend/API-Builder-UI
+          npm run build --prod
+          
       - name: Lint
         run: |
+          cd frontend/API-Builder-UI
           npm run lint
+          
       - name: Test
         run: |
-          npm run test -- --prod
+          cd frontend/API-Builder-UI
+          npm run test --prod
