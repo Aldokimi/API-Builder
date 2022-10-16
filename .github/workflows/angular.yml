@@ -1,69 +1,38 @@
-name: Build, Test & Deploy Angular on Github
-
+name: CD
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [ "main" ]
-  
+    branches:
+      - main
 jobs:
-  build:
-    name: All Steps (Build, Test & Deploy)
+  cd:
+    concurrency: ci-${{ github.ref }}
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x]
-
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Cache node modules
-        uses: actions/cache@v1
+      - name: Checkout ✅
+        uses: actions/checkout@v2
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/frontend/API-Builder-UI/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-            
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v1.4.2
+          persist-credentials: false
+      - name: Setup 🏗
+        uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install Dependencies
-        run: |
-          cd frontend/API-Builder-UI
-          npm ci
-          
-      - name: Run Unit Tests
-        run: |
-          cd frontend/API-Builder-UI
-          npm run ci:test
-
-      - name: Run codacy-coverage-reporter
-        uses: codacy/codacy-coverage-reporter-action@master
+          node-version: lts/*
+          cache: 'npm'
+      - name: Install ⚙️
+        run: npm ci
+      - name: Build 🛠
+        run: npm run build:ci
+      - name: Test 📋
+        run: npm run test:ci
+      - name: Publish 📢
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npx semantic-release
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
-          project-token: ${{ secrets.CODACY_CODE_COVERAGE_TOKEN }}
-          coverage-reports: coverage/lcov.info
-      
-      - name: Clean Distribution Directory
-        run: |
-          cd frontend/API-Builder-UI
-          npm run ci:clean
-        
-      - name: Build Application
-        run: |
-          cd frontend/API-Builder-UI
-          npm run ci:build
-      
-      - name: List Files in Distribution Directory
-        run: ls -R ./dist
-        
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@3.1.1
-        with:
-          ftp-server: "${{ secrets.CD_FTP_SERVER }}"
-          ftp-username: "${{ secrets.CD_FTP_USERNAME }}"
-          ftp-password: "${{ secrets.CD_FTP_PASSWORD }}"
-          local-dir: "dist/"
+          repository-name: bobbyg603/bobbyg603.github.io
+          branch: gh-pages
+          folder: dist/ngx-toggle-example
+          target-folder: ngx-toggle
+          token: ${{ secrets.GH_TOKEN }}
