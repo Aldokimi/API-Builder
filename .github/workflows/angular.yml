@@ -46,10 +46,10 @@ jobs:
           cd frontend/API-Builder-UI
           npm run build --prod
           
-      - name: Lint
-        run: |
-          cd frontend/API-Builder-UI
-          npm run lint
+#      - name: Lint
+#        run: |
+#          cd frontend/API-Builder-UI
+#          npm run lint
           
       - name: Test
         run: |
