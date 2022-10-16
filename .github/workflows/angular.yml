@@ -3,7 +3,9 @@ name: Build, Test & Deploy Angular on Github
 on:
   push:
     branches: [master]
-
+  pull_request:
+    branches: [ "main" ]
+  
 jobs:
   build:
     name: All Steps (Build, Test & Deploy)
