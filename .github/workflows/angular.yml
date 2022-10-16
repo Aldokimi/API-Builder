@@ -1,4 +1,4 @@
-name: CD
+name: Angular GitHub CI
 on:
   push:
     branches: [ "main" ]
@@ -6,37 +6,44 @@ on:
     branches: [ "main" ]
     
 jobs:
-  cd:
-    concurrency: ci-${{ github.ref }}
+  ci:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x]
+
     steps:
-      - name: Setup 🏗
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
         with:
-          node-version: lts/*
-          cache: 'npm'
-      - name: Install ⚙️
-        run: |
-          cd frontend/API-Builder-UI
-          npm ci
-      - name: Build 🛠
-        run: |
-          cd frontend/API-Builder-UI
-          npm run build:ci
-      - name: Test 📋
-        run: |
-          cd frontend/API-Builder-UI
-          npm run test:ci
-      - name: Publish 📢
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        id: cache-nodemodules
+        uses: actions/cache@v2
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npx semantic-release
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
+          cache-name: cache-node-modules
         with:
-          repository-name: bobbyg603/bobbyg603.github.io
-          branch: gh-pages
-          folder: dist/ngx-toggle-example
-          target-folder: ngx-toggle
-          token: ${{ secrets.GH_TOKEN }}
+          # caching node_modules
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install Dependencies
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+      - name: Build
+        run: |
+          npm run build -- --prod
+      - name: Lint
+        run: |
+          npm run lint
+      - name: Test
+        run: |
+          npm run test -- --prod
