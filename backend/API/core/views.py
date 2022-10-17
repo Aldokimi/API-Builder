@@ -12,31 +12,31 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .utils import get_tokens_for_user
+from .utils import get_tokens_for_user, make_dir_for_project_of_user, make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user
 from rest_framework.parsers import JSONParser
 
 
 # Authentication views
 class RegistrationView(APIView):
     def post(self, request):
+        '''Creates user + their own directory'''
+        
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            make_dir_for_user(serializer.data['email'])
             return Response({"message":"Successfully logged in", **serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     parser_classes = [JSONParser]
     def post(self, request):
-        print(request.data)
         if 'email' not in request.data or 'password' not in request.data:
             return Response({'msg': 'Credentials missing'}, status=status.HTTP_400_BAD_REQUEST)
 
         email = request.data.get('email', False)
         password = request.data.get('password', 'ERROR')
-        print(email, password)
         user = authenticate(request, email=email, password=password)
-        print(user)
         if user is not None:
             login(request, user)
             auth_data = get_tokens_for_user(request.user)
@@ -94,7 +94,10 @@ class UserDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
+        '''Deletes a user'''
+        
         user = self.get_object(pk)
+        remove_dirs_of_user(user.email)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -106,14 +109,19 @@ class ProjectList(APIView):
     """
     permission_classes = [IsAuthenticated, ]
     def get(self, request, format=None):
+        '''This views all the projects of ALL users'''
+        
         projects = Project.objects.all()
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        '''This creates a project directory for a specific user'''
+        
         projects = ProjectSerializer(data=request.data)
         if projects.is_valid():
             projects.save()
+            make_dir_for_project_of_user( projects.validated_data['owner'].email , projects.data['name'] )
             return Response(projects.data, status=status.HTTP_201_CREATED)
         return Response(projects.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -143,6 +151,9 @@ class ProjectDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
+        '''This deletes a certain project associated with a user'''
+        
         project = self.get_object(pk)
+        remove_dir_for_project_of_user(project.owner.email,project.name)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
