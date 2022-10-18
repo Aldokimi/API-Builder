@@ -1,29 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 @Component({
-  selector: 'app-register-page',
-  templateUrl: './register-page.component.html',
-  styleUrls: ['./../../../assets/css-js-login-signup/my-login.less']
+  selector: 'app-login-page',
+  templateUrl: './login-page.component.html',
+  styleUrls: ['./login-page.component.less']
 })
-export class RegisterPageComponent implements OnInit {
+export class LoginPageComponent implements OnInit {
 
   constructor(private fb: FormBuilder) { }
-  my_register_form!: FormGroup;
+  my_login_form!: FormGroup;
 
   
   isLoading = false;
   fieldTextType: boolean = false;
 
   ngOnInit(): void {
-    this.my_register_form = this.fb.group({
-      username: ['', Validators.required],
+    this.my_login_form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
     });
 
   }
 
-  onRegisterFormSubmit(form: FormGroup): void {
+  onLoginFormSubmit(form: FormGroup): void {
 
     console.log(form.controls);
 

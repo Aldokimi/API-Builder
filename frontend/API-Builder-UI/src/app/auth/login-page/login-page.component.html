@@ -9,22 +9,15 @@
 					<div class="card fat">
 						<div class="card-body">
 							<h4 class="card-title">Register</h4>
-							<form class="my-login-validation" [formGroup]="my_register_form"
-								(ngSubmit)="onRegisterFormSubmit(my_register_form)" *ngIf="!isLoading">
-
-
-								<div class="form-group">
-									<label for="username">User Name</label>
-									<input formControlName="username" placeholder="Your username" id="username"
-										type="text" class="form-control">
-								</div>
+							<form class="my-login-validation" [formGroup]="my_login_form"
+								(ngSubmit)="onLoginFormSubmit(my_login_form)" *ngIf="!isLoading">
 
 								<div class="form-group">
 									<label for="email">E-Mail Address</label>
 									<input formControlName="email" placeholder="Your email" id="email" type="text"
 										class="form-control">
 									<div class="error-message"
-										*ngIf="my_register_form!.get('email')!.invalid && (my_register_form!.get('email')!.dirty || my_register_form!.get('email')!.touched)">
+										*ngIf="my_login_form!.get('email')!.invalid && (my_login_form!.get('email')!.dirty || my_login_form!.get('email')!.touched)">
 										Please provide a valid email address.
 									</div>
 								</div>
@@ -49,19 +42,19 @@
 										</div>
 									</div>
 									<div class="error-message"
-										*ngIf="my_register_form!.get('password')!.invalid && (my_register_form!.get('password')!.dirty || my_register_form!.get('password')!.touched)">
+										*ngIf="my_login_form!.get('password')!.invalid && (my_login_form!.get('password')!.dirty || my_login_form!.get('password')!.touched)">
 										Password must be at least 8 characters.
 									</div>
 								</div>
 
 								<div class="form-group m-0">
-									<button type="submit" [disabled]="my_register_form.invalid"
+									<button type="submit" [disabled]="my_login_form.invalid"
 										class="btn btn-primary btn-block">
-										Register
+										Login
 									</button>
 								</div>
 								<div class="mt-4 text-center">
-									Already have an account? <a href="/login">Login</a>
+									You don't have account yet? <a href="/register">Register</a>
 								</div>
 							</form>
 						</div>
