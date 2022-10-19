@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-register-page',
   templateUrl: './register-page.component.html',
@@ -7,8 +7,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class RegisterPageComponent implements OnInit {
 
-  constructor(private fb: FormBuilder) { }
-  my_register_form!: FormGroup;
+  constructor(private fb: UntypedFormBuilder) { }
+  my_register_form!: UntypedFormGroup;
 
   
   isLoading = false;
@@ -23,7 +23,7 @@ export class RegisterPageComponent implements OnInit {
 
   }
 
-  onRegisterFormSubmit(form: FormGroup): void {
+  onRegisterFormSubmit(form: UntypedFormGroup): void {
 
     console.log(form.controls);
 

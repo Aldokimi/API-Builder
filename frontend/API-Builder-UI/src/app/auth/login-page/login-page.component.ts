@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-login-page',
@@ -8,8 +8,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class LoginPageComponent implements OnInit {
 
-  constructor(private fb: FormBuilder) { }
-  my_login_form!: FormGroup;
+  constructor(private fb: UntypedFormBuilder) { }
+  my_login_form!: UntypedFormGroup;
 
   
   isLoading = false;
@@ -23,7 +23,7 @@ export class LoginPageComponent implements OnInit {
 
   }
 
-  onLoginFormSubmit(form: FormGroup): void {
+  onLoginFormSubmit(form: UntypedFormGroup): void {
 
     console.log(form.controls);
 
