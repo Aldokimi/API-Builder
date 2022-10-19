@@ -11,8 +11,4 @@ export class NavBarComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  ngDoCheck() {
-    console.count('checked');
-  }
-
 }
