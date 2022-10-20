@@ -7,7 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { NavBarComponent } from './nav-bar/nav-bar.component';
-import { MatSliderModule } from '@angular/material/slider';
+import { CookieModule } from 'ngx-cookie';
 
 @NgModule({
   declarations: [
@@ -21,7 +21,7 @@ import { MatSliderModule } from '@angular/material/slider';
     FormsModule,
     AuthModule,
     ReactiveFormsModule,
-    MatSliderModule
+    CookieModule.withOptions()
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -14,6 +14,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .utils import get_tokens_for_user, make_dir_for_project_of_user, make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user
 from rest_framework.parsers import JSONParser
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Authentication views
@@ -44,13 +45,14 @@ class LoginView(APIView):
         return Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LogoutView(APIView):
+    @csrf_exempt
     def post(self, request):
         logout(request)
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated, ]
-
+    @csrf_exempt
     def post(self, request):
         serializer = PasswordChangeSerializer(context={'request': request}, data=request.data)
         serializer.is_valid(raise_exception=True) 
@@ -114,7 +116,7 @@ class ProjectList(APIView):
         projects = Project.objects.all()
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
-
+    @csrf_exempt
     def post(self, request, format=None):
         '''This creates a project directory for a specific user'''
         

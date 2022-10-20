@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -8,10 +10,8 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 })
 export class LoginPageComponent implements OnInit {
 
-  constructor(private fb: UntypedFormBuilder) { }
+  constructor(private fb: UntypedFormBuilder, private authService: AuthService, private router: Router) { }
   my_login_form!: UntypedFormGroup;
-
-  
   isLoading = false;
   fieldTextType: boolean = false;
 
@@ -25,14 +25,20 @@ export class LoginPageComponent implements OnInit {
 
   onLoginFormSubmit(form: UntypedFormGroup): void {
 
-    console.log(form.controls);
+    this.authService.login(this.my_login_form.get('email')?.value, this.my_login_form.get('password')?.value)
+      .subscribe((response) => {
+        console.log(response);
+      })
+
+    //this.authService.tryfetch().subscribe((res) => {console.log(res);})
+    
 
   }
 
 
 
-toggleFieldTextType() {
-  this.fieldTextType = !this.fieldTextType;
-}
+  toggleFieldTextType() {
+    this.fieldTextType = !this.fieldTextType;
+  }
 
 }

@@ -20,10 +20,13 @@
     "@angular/platform-browser": "^14.2.6",
     "@angular/platform-browser-dynamic": "^14.2.6",
     "@angular/router": "^14.2.6",
+    "@auth0/angular-jwt": "^5.1.0",
     "bootstrap": "^5.2.2",
+    "cors": "^2.8.5",
     "font-awesome": "^4.7.0",
     "jquery": "^3.6.1",
     "ngx-bootstrap-navbar": "^14.0.0",
+    "ngx-cookie": "^6.0.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
