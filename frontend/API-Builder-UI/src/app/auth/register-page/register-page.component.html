@@ -8,9 +8,11 @@
 					</div>
 					<div class="card fat">
 						<div class="card-body">
-							<h4 class="card-title">Register</h4>
+							<h3 class="card-title">Register</h3>
+							<div style="color:red ; font-size:medium; text-align: center; margin: 30px auto;">{{API_message}}</div>
+							<img  *ngIf="isLoading" src="./../../../assets/loading.gif" alt="loading" style="max-height: 84px;; max-width: 84px;; margin: auto; margin: auto 37%; position: relative;">
 							<form class="my-login-validation" [formGroup]="my_register_form"
-								(ngSubmit)="onRegisterFormSubmit(my_register_form)" *ngIf="!isLoading">
+								(ngSubmit)="onRegisterFormSubmit()" *ngIf="!isLoading">
 
 
 								<div class="form-group">

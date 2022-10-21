@@ -10,7 +10,7 @@ export class RegisterPageComponent implements OnInit {
 
   constructor(private fb: UntypedFormBuilder, private authService : AuthService) { }
   my_register_form!: UntypedFormGroup;
-
+  API_message = ''
   
   isLoading = false;
   fieldTextType: boolean = false;
@@ -24,13 +24,26 @@ export class RegisterPageComponent implements OnInit {
 
   }
 
-  onRegisterFormSubmit(form: UntypedFormGroup): void {
+  onRegisterFormSubmit(): void {
+    this.API_message = '';
     this.isLoading = true;
     this.authService.register(this.my_register_form.get('username')?.value,this.my_register_form.get('email')?.value, this.my_register_form.get('password')?.value)
-      .subscribe((response) => {
-        console.log(response);
-         this.isLoading = false; 
-      })
+    .subscribe(
+      () => {
+      this.isLoading = false;
+      }
+      ,(errorRes) => {
+        this.isLoading =false;
+        if(errorRes.error.email)
+            {this.API_message = errorRes.error.email.join(', ');}
+        else if(errorRes.error.username)
+        {this.API_message = errorRes.error.email.username(', ');}
+        else{
+          this.API_message = "Unknown Error, Please try again later.";
+        }
+        console.log(errorRes.error)}
+    )
+
   }
 
 

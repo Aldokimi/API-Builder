@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, tap } from 'rxjs';
 import { TokenModel } from './../models/token-model';
 import { CookieService } from 'ngx-cookie';
 import { Router } from '@angular/router';
@@ -63,9 +63,8 @@ export class AuthService {
      return this.http
       .post(`${this.myURL}login/`, JSON.stringify(payload), httpOptions,)
       .pipe(
-        map((data) => {
+        tap((data) => {
           let token = data as TokenModel;
-          console.log(token);
           localStorage.setItem('auth_token', JSON.stringify(token.access));
           this._isLoggedIn$.next(true);
           this.router.navigate(['home']);
@@ -74,12 +73,6 @@ export class AuthService {
           // ) as UserProfile;
 
           // this.userProfile.next(userInfo);
-          return of(token)
-          
-        }),
-        catchError((error) => {
-          //console.log(error);
-          return of(error);
         })
       );
   }
@@ -101,14 +94,8 @@ export class AuthService {
     return this.http
       .post<RegisterModel>(`${this.myURL}register/`, JSON.stringify(payload), httpOptions,)
       .pipe(
-        map((data) => {
-          let res = data as RegisterModel;
+        tap((data) => {
           this.router.navigate(['login']);
-          return of(true)
-        }),
-        catchError((error) => {
-          //console.log(error);
-          return of(false);
         })
       );
   }
