@@ -1,0 +1,78 @@
+<div class="my-login-page">
+	<section class="h-100">
+		<div class="container h-100">
+			<div class="row justify-content-md-center h-100">
+				<div class="card-wrapper">
+					<div class="brand">
+						<img src="./../../../assets/API.gif" alt="API LOGO">
+					</div>
+					<div class="card fat">
+						<div class="card-body">
+							<h3 class="card-title">Register</h3>
+							<div style="color:red ; font-size:medium; text-align: center; margin: 30px auto;">{{API_message}}</div>
+							<img  *ngIf="isLoading" src="./../../../assets/loading.gif" alt="loading" style="max-height: 84px;; max-width: 84px;; margin: auto; margin: auto 37%; position: relative;">
+							<form class="my-login-validation" [formGroup]="my_register_form"
+								(ngSubmit)="onRegisterFormSubmit()" *ngIf="!isLoading">
+
+
+								<div class="form-group">
+									<label for="username">User Name</label>
+									<input formControlName="username" placeholder="Your username" id="username"
+										type="text" class="form-control">
+								</div>
+
+								<div class="form-group">
+									<label for="email">E-Mail Address</label>
+									<input formControlName="email" placeholder="Your email" id="email" type="text"
+										class="form-control">
+									<div class="error-message"
+										*ngIf="my_register_form!.get('email')!.invalid && (my_register_form!.get('email')!.dirty || my_register_form!.get('email')!.touched)">
+										Please provide a valid email address.
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="input-group" >
+										<label for="password">Password</label>
+										<input formControlName="password"  placeholder="Password" id="password"
+										[type]="fieldTextType ? 'text' : 'password'" class="form-control">
+										<div class="input-group-append">
+											<span class="input-group-text cursor-pointer">
+												<i
+												class="fa"
+												aria-hidden="true"
+												style="cursor:pointer;"
+												[ngClass]="{
+												  'fa-eye-slash': !fieldTextType,
+												  'fa-eye': fieldTextType
+												}"
+												(click)="toggleFieldTextType()"
+											  ></i>
+											</span>
+										</div>
+									</div>
+									<div class="error-message"
+										*ngIf="my_register_form!.get('password')!.invalid && (my_register_form!.get('password')!.dirty || my_register_form!.get('password')!.touched)">
+										Password must be at least 8 characters.
+									</div>
+								</div>
+
+								<div class="form-group m-0">
+									<button type="submit" [disabled]="my_register_form.invalid"
+										class="btn btn-primary btn-block">
+										Register
+									</button>
+								</div>
+								<div class="mt-4 text-center">
+									Already have an account? <a 
+									routerLink="/login"
+									rounterLinkActive="true">Login</a>
+								</div>
+							</form>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
