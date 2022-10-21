@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .utils import get_tokens_for_user, make_dir_for_project_of_user, make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user
+from .utils import get_tokens_for_user, make_dir_for_project_of_user, make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user, initialize_localrepo, commit_repo_changes
 from rest_framework.parsers import JSONParser
 
 
@@ -122,6 +122,7 @@ class ProjectList(APIView):
         if projects.is_valid():
             projects.save()
             make_dir_for_project_of_user( projects.validated_data['owner'].email , projects.data['name'] )
+            initialize_localrepo( projects.validated_data['owner'].email , projects.data['name'] )
             return Response(projects.data, status=status.HTTP_201_CREATED)
         return Response(projects.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -147,6 +148,8 @@ class ProjectDetail(APIView):
         serializer = ProjectSerializer(project, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            name = (project.owner.first_name + " " + project.owner.last_name)
+            commit_repo_changes( project.owner.email , name ,project.name ) # check project name change + dir name change
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

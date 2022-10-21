@@ -1,6 +1,8 @@
 from rest_framework_simplejwt.tokens import RefreshToken
 import os
 import shutil
+import git
+from git import Actor
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -60,3 +62,67 @@ def remove_dir_for_project_of_user(TheEmailOfuser,ProjectName):
         
     except OSError as error:
         print(error)
+    
+          
+def initialize_localrepo (TheEmailOfuser,ProjectName):
+    '''Initializes a localrepo inside the project folder, requires email and project name'''
+    
+    repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
+    
+    if(not os.path.isdir(repo_dir+"/.git")):
+        repo = git.Repo.init(repo_dir)
+    else:
+        print("Local repo already exists!")
+
+
+def get_history_of_repo (TheEmailOfuser,ProjectName):
+    '''Gets the history of the repo, returns a list containing dictionaries, requires email and project name'''
+
+    repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
+    
+    if(os.path.isdir(repo_dir+"/.git")):
+        
+        repo = git.Repo(repo_dir)
+        
+        Log = repo.git.log('--pretty=format:%h</^-^\>%an</^-^\>%ae</^-^\>%aD</^-^\>%ar</^-^\>%s')
+        theChanges_aslists = Log.split("\n")
+        listOfChanges = []
+
+        for theChange in theChanges_aslists:
+            
+            DetailedChange = theChange.split("</^-^\>")
+            theDictionary = {
+                "Hash":"",
+                "Author":"",
+                "AuthorEmail":"",
+                "Time":"",
+                "TimeAgo":"",
+                "Commit Message":""
+            }
+            
+            for value, dictionaryKey in zip(DetailedChange,theDictionary): 
+                theDictionary[dictionaryKey] = value
+                
+            listOfChanges.append(theDictionary)
+            
+        return listOfChanges
+        
+    else:
+        print(f"Repo in: {repo_dir} does not exist!")
+        return
+    
+    
+def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
+    '''Commits the changes made by the user, requires email, name, and project name' '''
+    
+    repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
+    
+    if(os.path.isdir(repo_dir+"/.git")):
+        
+        repo = git.Repo(repo_dir)
+        repo.index.add('**')
+        author = Actor(userName,TheEmailOfuser)
+        repo.index.commit("User made changes", author=author)
+        
+    else:
+        print(f"Repo in: {repo_dir} does not exist!") 
