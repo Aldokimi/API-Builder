@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-register-page',
   templateUrl: './register-page.component.html',
@@ -7,7 +8,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 })
 export class RegisterPageComponent implements OnInit {
 
-  constructor(private fb: UntypedFormBuilder) { }
+  constructor(private fb: UntypedFormBuilder, private authService : AuthService) { }
   my_register_form!: UntypedFormGroup;
 
   
@@ -24,9 +25,12 @@ export class RegisterPageComponent implements OnInit {
   }
 
   onRegisterFormSubmit(form: UntypedFormGroup): void {
-
-    console.log(form.controls);
-
+    this.isLoading = true;
+    this.authService.register(this.my_register_form.get('username')?.value,this.my_register_form.get('email')?.value, this.my_register_form.get('password')?.value)
+      .subscribe((response) => {
+        console.log(response);
+         this.isLoading = false; 
+      })
   }
 
 

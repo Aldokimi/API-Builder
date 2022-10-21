@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -9,6 +9,7 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./login-page.component.less']
 })
 export class LoginPageComponent implements OnInit {
+  API_message:string = '';
 
   constructor(private fb: UntypedFormBuilder, private authService: AuthService, private router: Router) { }
   my_login_form!: UntypedFormGroup;
@@ -24,11 +25,14 @@ export class LoginPageComponent implements OnInit {
   }
 
   onLoginFormSubmit(form: UntypedFormGroup): void {
-
+    this.isLoading = true
     this.authService.login(this.my_login_form.get('email')?.value, this.my_login_form.get('password')?.value)
       .subscribe((response) => {
         console.log(response);
+        this.API_message = response?.msg;
+        this.isLoading = false;
       })
+
 
     
 

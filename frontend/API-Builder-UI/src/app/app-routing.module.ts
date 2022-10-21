@@ -9,11 +9,15 @@ import { IsAuthenticatedGuard } from './auth/guards/is-authenticated.guard';
 const routes: Routes = [
   {
     path: "",
-    component: MainPageComponent
+    component: MainPageComponent,
+    canActivate: [IsAuthenticatedGuard]
+
   },
   {
     path: "home",
-    component: MainPageComponent
+    component: MainPageComponent,
+    canActivate: [IsAuthenticatedGuard]
+
   },
   {
     path: "myprojects",
