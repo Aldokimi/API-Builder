@@ -2,7 +2,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, map, of } from 'rxjs';
 import { TokenModel } from './../models/token-model';
-import { HttpClientModule, HttpClientXsrfModule, HttpParams} from "@angular/common/http";
 import { CookieService } from 'ngx-cookie';
 
 
@@ -55,20 +54,16 @@ export class AuthService {
     const payload = { "email": email, "password": password };
     console.log(JSON.stringify(payload));
 
-    const csrfToken: any = this.getCookie('csrftoken'); 
     const httpOptions = {
       headers: new HttpHeaders({'Content-Type': 'application/json'})
-    }
-    console.log(csrfToken,4444);
-    
-    
+    }    
     return this.http
-      .post('//127.0.0.1:8000/api/login/', JSON.stringify(payload), httpOptions,)
+      .post<TokenModel>('//127.0.0.1:8000/api/login/', JSON.stringify(payload), httpOptions,)
       .pipe(
         map((data) => {
           let token = data as TokenModel;
           console.log(token);
-          localStorage.setItem('auth_token', JSON.stringify(token));
+          localStorage.setItem('auth_token', JSON.stringify(token.access));
           this._isLoggedIn$.next(true);
 
           // var userInfo = this.jwtService.decodeToken(

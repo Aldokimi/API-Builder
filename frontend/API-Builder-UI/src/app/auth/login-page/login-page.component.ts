@@ -30,7 +30,6 @@ export class LoginPageComponent implements OnInit {
         console.log(response);
       })
 
-    //this.authService.tryfetch().subscribe((res) => {console.log(res);})
     
 
   }
