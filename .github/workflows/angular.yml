@@ -1,4 +1,6 @@
-name: Angular GitHub CI
+
+name: Angular CI
+
 on:
   push:
     branches: [ "main" ]
@@ -6,8 +8,11 @@ on:
     branches: [ "main" ]
     
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ng-toolkit 
 
     strategy:
       matrix:
@@ -15,43 +20,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Cache node modules
-        id: cache-nodemodules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          # caching node_modules
-          path: frontend/API-Builder-UI/node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-            
-      - name: Install Dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-        run: |
-          cd frontend/API-Builder-UI
-          npm ci
-          
-      - name: Build
-        run: |
-          cd frontend/API-Builder-UI
-          npm run build --prod
-          
-#      - name: Lint
-#        run: |
-#          cd frontend/API-Builder-UI
-#          npm run lint
-          
-      - name: Test
-        run: |
-          cd frontend/API-Builder-UI
-          npm run test --prod
+      - run: npm ci
+      - run: npm run test:prod
+#       - run: npm run lint
