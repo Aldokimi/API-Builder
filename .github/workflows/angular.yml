@@ -24,6 +24,10 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run test:prod
+      - run: |
+          cd frontend/API-Builder-UI
+          npm ci
+      - run: |
+          cd frontend/API-Builder-UI
+          npm run test:prod
 #       - run: npm run lint
