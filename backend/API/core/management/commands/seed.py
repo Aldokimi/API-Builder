@@ -1,4 +1,5 @@
 import random
+import warnings
 
 from django.db import transaction
 from django.core.management.base import BaseCommand
@@ -12,6 +13,10 @@ NUM_OF_FAKE_USERS = 10
 NUM_OF_FAKE_PROJECTS = 50
 
 class Command(BaseCommand):
+    def __init__(self) -> None:
+        warnings.filterwarnings("ignore")
+        super().__init__()
+        
     help = "Generates test data"
 
     @transaction.atomic
