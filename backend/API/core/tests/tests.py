@@ -1,11 +1,13 @@
 import json
 from django.test import TestCase
 
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, CoreAPIClient, APITransactionTestCase, RequestsClient, APIClient
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
+
 
 from core.models import User, Project, UserManager
 from core.tests.factories import UserFactory, ProjectFactory
@@ -13,11 +15,12 @@ from core.views import RegistrationView, LoginView, LogoutView, ChangePasswordVi
 import random
 
 
+
 from django.core.management import call_command
 
 
-# # The Test class only tests those methods who name begins with a lower-case test.... 
-# # So you can put in extra helper methods TestA and TestB which won't get run unless you explicitly call them.
+# The Test class only tests those methods who name begins with a lower-case test.... 
+# So you can put in extra helper methods TestA and TestB which won't get run unless you explicitly call them.
 
 
 # def make_db ():
@@ -32,9 +35,11 @@ from django.core.management import call_command
 #         owner = random.choice(people)
 #         project = ProjectFactory(owner=owner)
 
+
 # User creation tests
 class test_case_user_registration(APITestCase):
     
+
     def setUp(self):
         '''Set up the initial stuff before running the test cases'''
         self.url = 'http://127.0.0.1:8000/api/register/'
