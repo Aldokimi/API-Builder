@@ -1,8 +1,9 @@
 from rest_framework_simplejwt.tokens import RefreshToken
 import os
 import shutil
-import git
-from git import Actor
+import pygit2
+from datetime import datetime, timezone, timedelta
+
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -22,9 +23,9 @@ def make_dir_for_user(TheEmailOfuser):
             os.mkdir(f"/home/API-Builder")
         
         os.mkdir(f"/home/API-Builder/{TheEmailOfuser}")
-        
+
     except OSError as error:
-        print (error)
+        print ('make_dir_for_user:',error)
         
         
 def remove_dirs_of_user(TheEmailOfuser):
@@ -34,9 +35,9 @@ def remove_dirs_of_user(TheEmailOfuser):
         if(os.path.exists(f"/home/API-Builder/{TheEmailOfuser}")):
             shutil.rmtree(f"/home/API-Builder/{TheEmailOfuser}")
         else:
-            print(f"User {TheEmailOfuser} does not have any directories!")
+            print(f"(remove_dirs_of_user): User {TheEmailOfuser} does not have any directories!")
     except OSError as error:
-        print(error)
+        print('remove_dirs_of_user:',error)
         
         
 def make_dir_for_project_of_user(TheEmailOfuser,ProjectName):
@@ -44,11 +45,11 @@ def make_dir_for_project_of_user(TheEmailOfuser,ProjectName):
     
     try:
         if(os.path.exists(f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}")):
-            print(f"User: '{TheEmailOfuser}' already has a directory under name: /home/API-Builder/{TheEmailOfuser}/{ProjectName}")
+            print(f"(make_dir_for_project_of_user): User '{TheEmailOfuser}' already has a directory under name: /home/API-Builder/{TheEmailOfuser}/{ProjectName}")
         else:
             os.mkdir(f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}")
     except OSError as error:
-        print(error)
+        print('make_dir_for_project_of_user:',error)
         
         
 def remove_dir_for_project_of_user(TheEmailOfuser,ProjectName):
@@ -58,10 +59,10 @@ def remove_dir_for_project_of_user(TheEmailOfuser,ProjectName):
         if(os.path.exists(f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}")):
             shutil.rmtree(f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}")
         else:
-            print(f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}  (DOES NOT EXIST!)")
+            print(f"(remove_dir_for_project_of_user): /home/API-Builder/{TheEmailOfuser}/{ProjectName}  (DOES NOT EXIST!)")
         
     except OSError as error:
-        print(error)
+        print('remove_dir_for_project_of_user:',error)
     
           
 def initialize_localrepo (TheEmailOfuser,ProjectName):
@@ -70,46 +71,50 @@ def initialize_localrepo (TheEmailOfuser,ProjectName):
     repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
     
     if(not os.path.isdir(repo_dir+"/.git")):
-        repo = git.Repo.init(repo_dir)
+        repo = pygit2.init_repository(repo_dir, initial_head='master')
     else:
-        print("Local repo already exists!")
+        print("(initialize_localrepo): Local repo already exists!")
 
 
 def get_history_of_repo (TheEmailOfuser,ProjectName):
-    '''Gets the history of the repo, returns a list containing dictionaries, requires email and project name'''
+    '''Gets the history of the repo, returns a JSON containing dictionaries, requires email and project name'''
 
     repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
     
     if(os.path.isdir(repo_dir+"/.git")):
         
-        repo = git.Repo(repo_dir)
+        repo = pygit2.Repository(repo_dir)
+        theDictionary = {}
         
-        Log = repo.git.log('--pretty=format:%h</^-^\>%an</^-^\>%ae</^-^\>%aD</^-^\>%ar</^-^\>%s')
-        theChanges_aslists = Log.split("\n")
-        listOfChanges = []
-
-        for theChange in theChanges_aslists:
+        commits = repo.walk(repo.head.target, pygit2.GIT_SORT_TOPOLOGICAL)
+        sum_commits = 0
+        for c in commits: sum_commits+=1
+        
+        for commit in repo.walk(repo.head.target, pygit2.GIT_SORT_TOPOLOGICAL):
             
-            DetailedChange = theChange.split("</^-^\>")
-            theDictionary = {
-                "Hash":"",
-                "Author":"",
-                "AuthorEmail":"",
-                "Time":"",
-                "TimeAgo":"",
-                "Commit Message":""
+            the_author = commit.author
+            tzinfo = timezone( timedelta(minutes=the_author.offset) )
+            dt = datetime.fromtimestamp(float(the_author.time), tzinfo)
+            timestr = dt.strftime('%c %z')
+            order = f'Commit# {sum_commits}'
+            msg = commit.message.strip('\n')
+            
+            dic = {
+                "Hash":f"{commit.hex}",
+                "Author":f"{the_author.name}",
+                "AuthorEmail":f"{the_author.email}",
+                "Time":f"{timestr}",
+                "Commit Message":f"{msg}"
             }
+        
+            theDictionary[order] = dic
+            sum_commits-=1
             
-            for value, dictionaryKey in zip(DetailedChange,theDictionary): 
-                theDictionary[dictionaryKey] = value
-                
-            listOfChanges.append(theDictionary)
-            
-        return listOfChanges
+        return theDictionary
         
     else:
-        print(f"Repo in: {repo_dir} does not exist!")
-        return
+        print(f"(get_history_of_repo): Repo in: {repo_dir} does not exist!")
+        return {}
     
     
 def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
@@ -119,10 +124,20 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
     
     if(os.path.isdir(repo_dir+"/.git")):
         
-        repo = git.Repo(repo_dir)
-        repo.index.add('**')
-        author = Actor(userName,TheEmailOfuser)
-        repo.index.commit("User made changes", author=author)
+        repo = pygit2.Repository(repo_dir)
+        (index := repo.index).add_all()
+        index.write()
+        tree = index.write_tree()
+        author = pygit2.Signature(userName,TheEmailOfuser)
+        committer = pygit2.Signature(userName,TheEmailOfuser)
+        message = "User made changes"
         
-    else:
-        print(f"Repo in: {repo_dir} does not exist!") 
+        #Safety check incase this is the first commit:
+        try:
+            tmp = repo.head.target # this can raise an error if this is the very first commit
+            repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
+        except pygit2.GitError:
+            repo.create_commit("HEAD", author, committer, message, tree, [])
+        
+    else:   #changing the directory name
+        print(f"(commit_repo_changes): Repo in: {repo_dir} does not exist!") 
