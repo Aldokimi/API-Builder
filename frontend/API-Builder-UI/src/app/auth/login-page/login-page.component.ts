@@ -18,6 +18,10 @@ export class LoginPageComponent implements OnInit {
   fieldTextType: boolean = false;
 
   ngOnInit(): void {
+    this.authService.isLoggedIn.subscribe(isLogged => {
+      if (isLogged)
+        this.router.navigate(['home'])
+    })
     this.my_login_form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],

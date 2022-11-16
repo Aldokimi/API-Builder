@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-register-page',
@@ -8,7 +9,7 @@ import { AuthService } from '../services/auth.service';
 })
 export class RegisterPageComponent implements OnInit {
 
-  constructor(private fb: UntypedFormBuilder, private authService : AuthService) { }
+  constructor(private fb: UntypedFormBuilder, private authService : AuthService, private router:Router) { }
   my_register_form!: UntypedFormGroup;
   API_message = ''
   
@@ -16,6 +17,10 @@ export class RegisterPageComponent implements OnInit {
   fieldTextType: boolean = false;
 
   ngOnInit(): void {
+    this.authService.isLoggedIn.subscribe(isLogged => {
+      if (isLogged)
+        this.router.navigate(['home'])
+    })
     this.my_register_form = this.fb.group({
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -34,10 +39,10 @@ export class RegisterPageComponent implements OnInit {
       }
       ,(errorRes) => {
         this.isLoading =false;
-        if(errorRes.error.email)
-            {this.API_message = errorRes.error.email.join(', ');}
-        else if(errorRes.error.username)
-        {this.API_message = errorRes.error.email.username(', ');}
+        if(errorRes.error?.email)
+            {this.API_message = errorRes.error?.email.join(', ');}
+        else if(errorRes.error?.username)
+        {this.API_message = errorRes.error?.email.username(', ');}
         else{
           this.API_message = "Unknown Error, Please try again later.";
         }

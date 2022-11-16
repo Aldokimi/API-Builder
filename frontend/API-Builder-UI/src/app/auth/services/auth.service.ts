@@ -16,15 +16,15 @@ export class AuthService {
 
   private  myURL = `//127.0.0.1:8000/api/`;
   private _isLoggedIn$ = new BehaviorSubject<boolean>(false);
+  private readonly TOKEN_NAME = 'auth_token';
   isLoggedIn = this._isLoggedIn$.asObservable();
 
-
+  get token(){
+    return localStorage.getItem(this.TOKEN_NAME)
+  }
   constructor(private http: HttpClient,private cookieService: CookieService, private router :Router) {
-    const token = localStorage.getItem('auth_token');
-    this._isLoggedIn$.next(!!token)
-  
-
-    
+    const token = localStorage.getItem(this.TOKEN_NAME);
+    this._isLoggedIn$.next(!!this.token)
    }
 
 
@@ -34,24 +34,7 @@ export class AuthService {
     return this.cookieService.get(key);
   }
 
-
-  //  public tryfetch()
-  //  {
-  //   return this.http
-  //     .get('//127.0.0.1:8000/api/users/')
-  //     .pipe(
-  //       map((data) => {
-  //        console.log(data);
-  //          return true;
-  //       }),
-  //       catchError((error) => {
-  //         console.log(error);
-  //         return of(false);
-  //       })
-  //     );
-  // }
-
-
+ 
 
   public login(email: string, password: string): Observable<any> {
     const payload = { "email": email, "password": password };
@@ -65,7 +48,7 @@ export class AuthService {
       .pipe(
         tap((data) => {
           let token = data as TokenModel;
-          localStorage.setItem('auth_token', JSON.stringify(token.access));
+          localStorage.setItem(this.TOKEN_NAME, JSON.stringify(token.access));
           this._isLoggedIn$.next(true);
           this.router.navigate(['home']);
           // var userInfo = this.jwtService.decodeToken(
@@ -100,6 +83,9 @@ export class AuthService {
       );
   }
 
+  public logout():void{
+    localStorage.removeItem(this.TOKEN_NAME);
+  }
 
 
 }
