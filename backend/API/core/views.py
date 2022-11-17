@@ -42,6 +42,7 @@ class LoginView(APIView):
         if user is not None:
             login(request, user)
             auth_data = get_tokens_for_user(request.user)
+            auth_data['id'] = request.user.id
             return Response({'msg': 'Login Success', **auth_data}, status=status.HTTP_200_OK)
         return Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -97,7 +98,11 @@ class UserDetail(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
+        
         user = self.get_object(pk)
+        if user.id is not self.request.user.id:
+            raise PermissionDenied()
+        
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -110,6 +115,8 @@ class UserDetail(APIView):
         '''Deletes a user'''
         
         user = self.get_object(pk)
+        if user.id is not self.request.user.id:
+            raise PermissionDenied()
         remove_dirs_of_user(user.email)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -172,8 +179,8 @@ class ProjectDetail(APIView):
         '''This deletes a certain project associated with a user'''
         
         project = self.get_object(pk)
-        if project.owner is not self.request.user:
-             raise PermissionDenied()
+        if project.owner.id is not self.request.user.id:
+            raise PermissionDenied()
         remove_dir_for_project_of_user(project.owner.email,project.name)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
