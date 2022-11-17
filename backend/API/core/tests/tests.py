@@ -15,6 +15,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 
 from django.core.management import call_command
 
+from core.utils import get_tokens_for_user
 
 
 # The Test class only tests those methods who name begins with a lower-case test.... 
@@ -277,14 +278,17 @@ class test_case_user_delete(APITestCase):
         response_login = user_view_login(request_login)
     
     
-        #header = {"Authorization":f"Bearer {response_login.data['access']}"}       
-        #factory_official.delete(f"{theURL}{x.id}", user2, format='json', **header, follow=True")
+        # header = {"Authorization":f"Bearer {response_login.data['access']}"}       
+        # factory_official.delete(f"{theURL}{x.id}", user2, format='json', **header, follow=True")
     
     
         if response_login.status_code == status.HTTP_200_OK:
-            self.u = User.objects.filter(email=user1['email']).first()
-            self.token = Token.objects.create(user=self.u)
-            self.token.save()
+            
+            #noNeed to save the token
+            #self.u = User.objects.filter(email=user1['email']).first()
+            #self.token = Token.objects.create(user=self.u)
+            #self.token.save()
+            pass
         else:
             raise Exception("(test_case_user_delete-Perform_Test): Error occurred during login to test user!")
         
@@ -304,7 +308,9 @@ class test_case_user_delete(APITestCase):
         else:
     
             x = User.objects.filter(email=user1['email']).first()
-            request_official = factory_official.delete(f"{theURL}{x.id}", user1, format='json', HTTP_AUTHORIZATION=f"Bearer {response_login.data['access']}")
+            #request_official = factory_official.delete(f"{theURL}{x.id}", user1, format='json') #auth failure error code 401
+            #request_official = factory_official.delete(f"{theURL}{x.id}", user1, format='json', HTTP_AUTHORIZATION=f"Bearer {get_tokens_for_user(x)['access']}") #works
+            request_official = factory_official.delete(f"{theURL}{x.id}", user1, format='json',HTTP_AUTHORIZATION=f"Bearer {response_login.data['access']}")
             response_official = user_view_official(request_official, pk=x.id)
         return response_official
     
@@ -321,3 +327,89 @@ class test_case_user_delete(APITestCase):
         
         response = self.Perform_Test(self.user1_payload,self.user2_payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+
+class test_case_user_changepassword(APITestCase):
+    
+    @classmethod
+    def setUpTestData(self):
+        
+        dumdumUser_changepassword = {
+            "username": "dumdumUser_changepassword",
+            "email": "dumdumUser_changepassword@email.com",
+            "password": "bruhChangePassword",
+            "password2": "bruhChangePassword",
+            "date_of_birth": "2000-10-22T00:00:00Z"
+        }
+        
+        self.user_payload_changePass = {
+            "email": "dumdumUser_changepassword@email.com",
+            "current_password": "bruhChangePassword",
+            "new_password": "bruhChangePasswordNEW"
+        }
+        
+        self.user_payload_toLoginNewPass = {
+            "email":"dumdumUser_changepassword@email.com",
+            "password":"bruhChangePasswordNEW"
+        }
+        self.user_payload_toLoginOldPass = {
+            "email":"dumdumUser_changepassword@email.com",
+            "password":"bruhChangePassword"
+        }
+        
+        factory = APIRequestFactory()
+        request = factory.post('http://127.0.0.1:8000/api/register/', dumdumUser_changepassword, format='json')
+        user_view = RegistrationView.as_view()
+        response = user_view(request)
+
+        if response.status_code == status.HTTP_201_CREATED:
+            pass
+        else:
+            raise Exception("Error occurred during creating a test user!")
+        
+    
+    
+    def Perform_Login(self,dataLogin):
+        
+        #Logging into the user
+        factory_login = APIRequestFactory()
+        user_view_login = LoginView.as_view()
+        
+        request_login = factory_login.post('http://127.0.0.1:8000/api/login/',dataLogin, format='json')
+        middleware = SessionMiddleware()
+        middleware.process_request(request_login)
+        request_login.session.save()
+        force_authenticate(request_login, dataLogin)
+        response_login = user_view_login(request_login)
+        
+        
+        if response_login.status_code == status.HTTP_200_OK:
+            pass
+        else:
+            raise Exception("(test_case_user_changepassword-Perform_Login): Error occurred during login to test user!")
+        
+        return response_login
+        
+    def Perform_Test(self,dataLogin,dataPasswordChange):
+      
+        response_login = self.Perform_Login(dataLogin)
+        
+        factory_official = APIRequestFactory()
+        user_view_official = ChangePasswordView.as_view()
+        theURL = "http://127.0.0.1:8000/api/change-password/"
+        
+        
+        request_official = factory_official.post(theURL, dataPasswordChange, format='json', HTTP_AUTHORIZATION=f"Bearer {response_login.data['access']}")
+        response_official = user_view_official(request_official)
+
+        return response_official
+    
+    
+    def test_user_changepassword (self):
+        '''Case to check if a logged in user can change their password, then logging into the new settings '''
+        
+        response_changepassword = self.Perform_Test(self.user_payload_toLoginOldPass,self.user_payload_changePass)
+        self.assertEqual(response_changepassword.status_code, status.HTTP_204_NO_CONTENT)
+        
+        response_loginToNewPassword = self.Perform_Login(self.user_payload_toLoginNewPass)
+        self.assertEqual(response_loginToNewPassword.status_code, status.HTTP_200_OK)
