@@ -110,6 +110,8 @@ class UserDetail(APIView):
         '''Deletes a user'''
         
         user = self.get_object(pk)
+        if user.id is not self.request.user.id:
+            raise PermissionDenied()
         remove_dirs_of_user(user.email)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -173,7 +175,7 @@ class ProjectDetail(APIView):
         
         project = self.get_object(pk)
         if project.owner is not self.request.user:
-             raise PermissionDenied()
+            raise PermissionDenied()
         remove_dir_for_project_of_user(project.owner.email,project.name)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
