@@ -11,7 +11,7 @@ from rest_framework.parsers import JSONParser
 
 from .serializers import UserSerializer, ProjectSerializer, \
      RegistrationSerializer, PasswordChangeSerializer
-from .utils import get_tokens_for_user, make_dir_for_project_of_user,\
+from .utils import get_history_of_repo, get_tokens_for_user, make_dir_for_project_of_user,\
      make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user,\
          initialize_localrepo, commit_repo_changes, rename_dir_for_user,\
             rename_dir_for_project_of_user
@@ -177,3 +177,21 @@ class ProjectDetail(APIView):
         remove_dir_for_project_of_user(project.owner.email,project.name)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# History management
+
+class ProjectHistoryDetail(APIView):
+    """
+    Get the history data of a project
+    """
+    permission_classes = [IsAuthenticated, ]
+    def get_object(self, pk):
+        try:
+            return Project.objects.get(pk=pk)
+        except Project.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        project = self.get_object(pk)
+        response_data = get_history_of_repo(project.owner.email, project.name)
+        return Response(response_data)

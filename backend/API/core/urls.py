@@ -19,4 +19,7 @@ urlpatterns = [
     # Project URLs
     path('projects/', views.ProjectList.as_view()),
     path('projects/<int:pk>/', views.ProjectDetail.as_view()),
+
+    # API Builder URLs
+    path('projects/<int:pk>/history', views.ProjectHistoryDetail.as_view(), name='history'),
 ]
