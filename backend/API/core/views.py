@@ -138,13 +138,16 @@ class ProjectList(APIView):
     def post(self, request, format=None):
         '''This creates a project directory for a specific user'''
         
-        projects = ProjectSerializer(data=request.data)
-        if projects.is_valid():
-            projects.save()
-            make_dir_for_project_of_user( projects.validated_data['owner'].email , projects.data['name'] )
-            initialize_localrepo( projects.validated_data['owner'].email , projects.data['name'] )
-            return Response(projects.data, status=status.HTTP_201_CREATED)
-        return Response(projects.errors, status=status.HTTP_400_BAD_REQUEST)
+        project = ProjectSerializer(data=request.data)
+        if project.is_valid():
+            
+            if project.validated_data['owner'].id is not self.request.user.id:
+                raise PermissionDenied()
+            project.save()
+            make_dir_for_project_of_user( project.validated_data['owner'].email , project.data['name'] )
+            initialize_localrepo( project.validated_data['owner'].email , project.data['name'] )
+            return Response(project.data, status=status.HTTP_201_CREATED)
+        return Response(project.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Project requests handling
 class ProjectDetail(APIView):
