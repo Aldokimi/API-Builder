@@ -27,7 +27,6 @@ class Command(BaseCommand):
                 for aUser in m.objects.all():
                     remove_dirs_of_user(str(aUser))
                 tmpBoolForUsers = False
-                
             m.objects.all().delete()
 
         self.stdout.write("Creating new data...")

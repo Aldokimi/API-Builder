@@ -1,20 +1,22 @@
 
 from django.http import Http404
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User, Project
-from .serializers import UserSerializer, ProjectSerializer, \
-     RegistrationSerializer, PasswordChangeSerializer
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from .utils import get_tokens_for_user, make_dir_for_project_of_user, make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user, initialize_localrepo, commit_repo_changes
 from rest_framework.parsers import JSONParser
 
+from .serializers import UserSerializer, ProjectSerializer, \
+     RegistrationSerializer, PasswordChangeSerializer
+from .utils import get_tokens_for_user, make_dir_for_project_of_user,\
+     make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user,\
+         initialize_localrepo, commit_repo_changes, rename_dir_for_user,\
+            rename_dir_for_project_of_user
+from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 
 # Authentication views
 class RegistrationView(APIView):
@@ -58,6 +60,15 @@ class ChangePasswordView(APIView):
         request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+# Permission classes
+class IsProjectOwner(BasePermission):
+    # for view permission
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+
+    # for object level permissions
+    def has_object_permission(self, request, view, vacation_obj):
+        return vacation_obj.owner.id == request.user.id
 
 # User requests handling 
 class UserList(APIView):
@@ -90,6 +101,8 @@ class UserDetail(APIView):
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            if user.email != serializer.validated_data["email"]:
+                rename_dir_for_user(user.email, serializer.validated_data["email"])
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -148,6 +161,8 @@ class ProjectDetail(APIView):
         serializer = ProjectSerializer(project, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            if project.name != serializer.validated_data["name"]:
+                rename_dir_for_user(project.name, serializer.validated_data["name"])
             name = (project.owner.first_name + " " + project.owner.last_name)
             commit_repo_changes( project.owner.email , name ,project.name ) # check project name change + dir name change
             return Response(serializer.data)
@@ -157,6 +172,8 @@ class ProjectDetail(APIView):
         '''This deletes a certain project associated with a user'''
         
         project = self.get_object(pk)
+        if project.owner is not self.request.user:
+             raise PermissionDenied()
         remove_dir_for_project_of_user(project.owner.email,project.name)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
