@@ -24,7 +24,7 @@ def make_dir_for_user(TheEmailOfuser):
         os.mkdir(f"/home/API-Builder/{TheEmailOfuser}")
 
     except OSError as error:
-         print ('make_dir_for_user:',error)
+        print ('make_dir_for_user:',error)
 
 def rename_dir_for_user(oldname, newname):
     '''Rename the directory upon changing the user email'''
@@ -34,9 +34,7 @@ def rename_dir_for_user(oldname, newname):
         else:
             print(f"User {oldname} does not have any directories!")
     except OSError as error:
-        print(error)
-
-        
+        print(error)    
         
 def remove_dirs_of_user(TheEmailOfuser):
     '''Removes all directories associated with the user, requires email'''
@@ -61,6 +59,7 @@ def make_dir_for_project_of_user(TheEmailOfuser,ProjectName):
     except OSError as error:
         print('make_dir_for_project_of_user:',error)
         
+
 def rename_dir_for_project_of_user(TheEmailOfuser, oldname, newname):
     '''Rename the directory upon changing the user email'''
     try:
@@ -88,7 +87,6 @@ def remove_dir_for_project_of_user(TheEmailOfuser,ProjectName):
 
 
 #####################       PYGIT2 CHANGES       #####################
-
 
 
 def initialize_localrepo (TheEmailOfuser,ProjectName):
@@ -151,7 +149,7 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
     if(os.path.isdir(repo_dir+"/.git")):
         
         repo = pygit2.Repository(repo_dir)
-        (index := repo.index).add_all()
+        index = (repo.index.add_all())
         index.write()
         tree = index.write_tree()
         author = pygit2.Signature(userName,TheEmailOfuser)
