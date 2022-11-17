@@ -21,10 +21,14 @@ from django.core.management import call_command
 
 
 # User creation tests
+
+"""
 class test_case_user_registration(APITestCase):
     
+    
+    @classmethod
+    def setUpTestData(self):
 
-    def setUp(self):
         '''Set up the initial stuff before running the test cases'''
         self.url = 'http://127.0.0.1:8000/api/register/'
 
@@ -67,7 +71,7 @@ class test_case_user_registration(APITestCase):
         }
 
 
-    def perform_test(self, data):
+    def Perform_Test(self, data):
         
         factory = APIRequestFactory()
         request = factory.post(self.url, data, format='json')
@@ -80,7 +84,7 @@ class test_case_user_registration(APITestCase):
         '''Case to check if a new user creation is possible'''
     
         #User email does not exist
-        response = self.perform_test(self.valid_payload)
+        response = self.Perform_Test(self.valid_payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
          
          
@@ -88,7 +92,7 @@ class test_case_user_registration(APITestCase):
         '''Case to check if user creation is possible where the email already exists'''
         
         #User email exists
-        response = self.perform_test(self.existing_user_payload)
+        response = self.Perform_Test(self.existing_user_payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
         
@@ -96,7 +100,7 @@ class test_case_user_registration(APITestCase):
         '''Case to check if user creation is possible where the email is incorrect '''
         
         #User email invalid
-        response = self.perform_test(self.invalid_email_payload)
+        response = self.Perform_Test(self.invalid_email_payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -104,14 +108,16 @@ class test_case_user_registration(APITestCase):
         '''Case to check if user creation is possible where the password is invalid'''
         
         #User password invalid
-        response = self.perform_test(self.invalid_password_payload)
+        response = self.Perform_Test(self.invalid_password_payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 
 class test_case_user_login(APITestCase):
     
-    def setUp(self):
+    
+    @classmethod
+    def setUpTestData(self):
         '''Set up the initial stuff before running the test cases'''
         self.url = 'http://127.0.0.1:8000/api/login/'
 
@@ -159,7 +165,7 @@ class test_case_user_login(APITestCase):
         }
         
         
-    def perform_test(self, data, user=None):
+    def Perform_Test(self, data, user=None):
         
         request_factory = APIRequestFactory()
         view = LoginView.as_view()
@@ -179,7 +185,7 @@ class test_case_user_login(APITestCase):
         '''Case to check if a new user login is possible'''
     
         #User email exists
-        response = self.perform_test(self.valid_payload, self.user)
+        response = self.Perform_Test(self.valid_payload, self.user)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
          
          
@@ -187,7 +193,7 @@ class test_case_user_login(APITestCase):
         '''Case to check if user login is possible where the email already exists'''
         
         #User email does not exist
-        response = self.perform_test(self.none_existing_user_payload)
+        response = self.Perform_Test(self.none_existing_user_payload)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         
         
@@ -195,7 +201,7 @@ class test_case_user_login(APITestCase):
         '''Case to check if user login is possible where the username is email'''
         
         #User email is incorrect
-        response = self.perform_test(self.invalid_email_payload)
+        response = self.Perform_Test(self.invalid_email_payload)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -203,6 +209,124 @@ class test_case_user_login(APITestCase):
         '''Case to check if user login is possible where the password is invalid'''
         
         #User email exists but password is incorrect
-        response = self.perform_test(self.invalid_password_payload)
+        response = self.Perform_Test(self.invalid_password_payload)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+"""
+
+
+class test_case_user_delete(APITestCase):
+    
+    @classmethod
+    def setUpTestData(self):
         
+        self.u1 = {
+            "username": "test1",
+            "email": "test_user1@email.com",
+            "password": "bruhLOGIN1",
+            "password2": "bruhLOGIN1",
+            "date_of_birth": "2000-10-22T00:00:00Z"
+        }
+        self.u2 = {
+            "username": "test2",
+            "email": "test_user2@email.com",
+            "password": "bruhLOGIN2",
+            "password2": "bruhLOGIN2",
+            "date_of_birth": "2000-10-22T00:00:00Z"
+        }
+
+        
+        factory = APIRequestFactory()
+        request1 = factory.post('http://127.0.0.1:8000/api/register/', self.u1, format='json')
+        request2 = factory.post('http://127.0.0.1:8000/api/register/', self.u2, format='json')
+        user_view1 = RegistrationView.as_view()
+        user_view2 = RegistrationView.as_view()
+        response1 = user_view1(request1)
+        response2 = user_view2(request2)
+
+        if response1.status_code == status.HTTP_201_CREATED and response2.status_code == status.HTTP_201_CREATED:
+            pass
+        else:
+            raise Exception("Error occurred during creating a test user!")
+        
+        
+        self.user1_payload = {
+            "email": "test_user1@email.com",
+            "password": "bruhLOGIN1"
+        }
+        self.user2_payload = {
+            "email": "test_user2@email.com",
+            "password": "bruhLOGIN2"
+        }
+        self.user_invalid = {
+            "email": "iam_invalid@email.com",
+            "password": "iam_invalid"
+        }
+        
+        
+    def Perform_Test(self, user1, user2=None):
+        
+        #Logging into the user
+        factory_login = APIRequestFactory()
+        user_view_login = LoginView.as_view()
+        
+        request_login = factory_login.post('http://127.0.0.1:8000/api/login/',user1, format='json')
+        middleware = SessionMiddleware()
+        middleware.process_request(request_login)
+        request_login.session.save()
+        force_authenticate(request_login, user1)
+        response_login = user_view_login(request_login)
+    
+        header = {"Authorization":f"Bearer {response_login.data['access']}"}       
+    
+        #if response_login.status_code == status.HTTP_200_OK:
+        #    self.u = User.objects.filter(email=user1['email']).first()
+        #    self.token = Token.objects.create(user=self.u)
+        #    self.token.save()
+        #else:
+        #    raise Exception("(test_case_user_delete-Perform_Test): Error occurred during login to test user!")
+        
+          
+        factory_official = APIRequestFactory()
+        user_view_official = UserDetail.as_view()
+        
+        y = User.objects.filter(email=user1['email']).first()
+        theURL = f"http://127.0.0.1:8000/api/users/{y.id}/"
+        print(theURL)
+        
+        print(f"#1:{self.token}, #2: Bearer {response_login.data['access']}")
+        if(user2):
+            
+            x = User.objects.filter(email=user2['email']).first()
+            request_official = factory_official.delete(theURL, user2, format='json',**{"Authorization": f"Bearer {response_login.data['access']}"}, follow=True)
+            response_official = user_view_official(request_official)
+        #User1 wants to delete themselves
+        else:
+    
+            x = User.objects.filter(email=user1['email']).first()
+            print("HERE",x.id)
+            request_official = factory_official.delete(theURL,user1, format='json',**{"Authorization": f"Bearer {response_login.data['access']}"}, follow=True)
+            response_official = user_view_official(request_official)
+        return response_official
+    
+    
+    def test_delete_user_owner(self):
+        '''Case to check if the user can delete themselves'''
+        
+        response = self.Perform_Test(self.user1_payload)
+        response.render()
+        print("RESPONSE:",response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        
+    def test_delete_user_notowner(self):
+        '''Case to check if a user can delete another user '''
+        
+        #response = self.Perform_Test(self.user1_payload,self.user2_payload)
+        #self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        
+    def test_delete_user_nonexist(self):
+        '''Case to check if a user can delete a non existant user'''
+        
+        #response = self.Perform_Test(self.user1_payload,self.user_invalid)
+        #self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
