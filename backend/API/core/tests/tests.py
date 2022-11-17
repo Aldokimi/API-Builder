@@ -16,13 +16,13 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.management import call_command
 
 
+
 # The Test class only tests those methods who name begins with a lower-case test.... 
 # So you can put in extra helper methods TestA and TestB which won't get run unless you explicitly call them.
 
 
 # User creation tests
 
-"""
 class test_case_user_registration(APITestCase):
     
     
@@ -211,7 +211,7 @@ class test_case_user_login(APITestCase):
         #User email exists but password is incorrect
         response = self.Perform_Test(self.invalid_password_payload)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-"""
+
 
 
 class test_case_user_delete(APITestCase):
@@ -219,14 +219,14 @@ class test_case_user_delete(APITestCase):
     @classmethod
     def setUpTestData(self):
         
-        self.u1 = {
+        u1 = {
             "username": "test1",
             "email": "test_user1@email.com",
             "password": "bruhLOGIN1",
             "password2": "bruhLOGIN1",
             "date_of_birth": "2000-10-22T00:00:00Z"
         }
-        self.u2 = {
+        u2 = {
             "username": "test2",
             "email": "test_user2@email.com",
             "password": "bruhLOGIN2",
@@ -236,8 +236,8 @@ class test_case_user_delete(APITestCase):
 
         
         factory = APIRequestFactory()
-        request1 = factory.post('http://127.0.0.1:8000/api/register/', self.u1, format='json')
-        request2 = factory.post('http://127.0.0.1:8000/api/register/', self.u2, format='json')
+        request1 = factory.post('http://127.0.0.1:8000/api/register/', u1, format='json')
+        request2 = factory.post('http://127.0.0.1:8000/api/register/', u2, format='json')
         user_view1 = RegistrationView.as_view()
         user_view2 = RegistrationView.as_view()
         response1 = user_view1(request1)
@@ -276,36 +276,36 @@ class test_case_user_delete(APITestCase):
         force_authenticate(request_login, user1)
         response_login = user_view_login(request_login)
     
-        header = {"Authorization":f"Bearer {response_login.data['access']}"}       
     
-        #if response_login.status_code == status.HTTP_200_OK:
-        #    self.u = User.objects.filter(email=user1['email']).first()
-        #    self.token = Token.objects.create(user=self.u)
-        #    self.token.save()
-        #else:
-        #    raise Exception("(test_case_user_delete-Perform_Test): Error occurred during login to test user!")
+        #header = {"Authorization":f"Bearer {response_login.data['access']}"}       
+        #factory_official.delete(f"{theURL}{x.id}", user2, format='json', **header, follow=True")
+    
+    
+        if response_login.status_code == status.HTTP_200_OK:
+            self.u = User.objects.filter(email=user1['email']).first()
+            self.token = Token.objects.create(user=self.u)
+            self.token.save()
+        else:
+            raise Exception("(test_case_user_delete-Perform_Test): Error occurred during login to test user!")
         
-          
+        
         factory_official = APIRequestFactory()
         user_view_official = UserDetail.as_view()
+        theURL = "http://127.0.0.1:8000/api/users/"
         
-        y = User.objects.filter(email=user1['email']).first()
-        theURL = f"http://127.0.0.1:8000/api/users/{y.id}/"
-        print(theURL)
         
-        print(f"#1:{self.token}, #2: Bearer {response_login.data['access']}")
+        #User1 wants to delete user2
         if(user2):
             
             x = User.objects.filter(email=user2['email']).first()
-            request_official = factory_official.delete(theURL, user2, format='json',**{"Authorization": f"Bearer {response_login.data['access']}"}, follow=True)
-            response_official = user_view_official(request_official)
+            request_official = factory_official.delete(f"{theURL}{x.id}", user2, format='json', HTTP_AUTHORIZATION=f"Bearer {response_login.data['access']}")
+            response_official = user_view_official(request_official, pk=x.id)
         #User1 wants to delete themselves
         else:
     
             x = User.objects.filter(email=user1['email']).first()
-            print("HERE",x.id)
-            request_official = factory_official.delete(theURL,user1, format='json',**{"Authorization": f"Bearer {response_login.data['access']}"}, follow=True)
-            response_official = user_view_official(request_official)
+            request_official = factory_official.delete(f"{theURL}{x.id}", user1, format='json', HTTP_AUTHORIZATION=f"Bearer {response_login.data['access']}")
+            response_official = user_view_official(request_official, pk=x.id)
         return response_official
     
     
@@ -313,20 +313,11 @@ class test_case_user_delete(APITestCase):
         '''Case to check if the user can delete themselves'''
         
         response = self.Perform_Test(self.user1_payload)
-        response.render()
-        print("RESPONSE:",response.content)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         
         
     def test_delete_user_notowner(self):
         '''Case to check if a user can delete another user '''
         
-        #response = self.Perform_Test(self.user1_payload,self.user2_payload)
-        #self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        
-        
-    def test_delete_user_nonexist(self):
-        '''Case to check if a user can delete a non existant user'''
-        
-        #response = self.Perform_Test(self.user1_payload,self.user_invalid)
-        #self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.Perform_Test(self.user1_payload,self.user2_payload)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
