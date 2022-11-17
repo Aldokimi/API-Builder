@@ -277,26 +277,12 @@ class test_case_user_delete(APITestCase):
         force_authenticate(request_login, user1)
         response_login = user_view_login(request_login)
     
-    
-        # header = {"Authorization":f"Bearer {response_login.data['access']}"}       
-        # factory_official.delete(f"{theURL}{x.id}", user2, format='json', **header, follow=True")
-    
-    
-        if response_login.status_code == status.HTTP_200_OK:
-            
-            #noNeed to save the token
-            #self.u = User.objects.filter(email=user1['email']).first()
-            #self.token = Token.objects.create(user=self.u)
-            #self.token.save()
-            pass
-        else:
-            raise Exception("(test_case_user_delete-Perform_Test): Error occurred during login to test user!")
-        
+        if not response_login.status_code == status.HTTP_200_OK:
+            raise Exception("(test_case_user_delete-Perform_Test): Error occurred during login to test user!")    
         
         factory_official = APIRequestFactory()
         user_view_official = UserDetail.as_view()
         theURL = "http://127.0.0.1:8000/api/users/"
-        
         
         #User1 wants to delete user2
         if(user2):
