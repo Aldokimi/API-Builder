@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginPageComponent } from './login-page/login-page.component';
 import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { IsAuthenticatedGuard } from './guards/is-authenticated.guard';
 
 
 @NgModule({
@@ -21,7 +22,7 @@ import { HttpClient, HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS }
     HttpClientModule,
     HttpClientXsrfModule
   ],
-  providers: [HttpClient],
+  providers: [HttpClient,IsAuthenticatedGuard],
   bootstrap: []
 })
 export class AuthModule { }

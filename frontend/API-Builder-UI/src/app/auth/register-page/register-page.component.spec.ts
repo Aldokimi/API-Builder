@@ -9,6 +9,7 @@ import { AppModule } from 'src/app/app.module';
 import { AuthService } from '../services/auth.service';
 import { RegisterPageComponent } from './register-page.component';
 import { validUser, blankUser } from './../../../mocks/registerMock';
+import { Router } from '@angular/router';
 
 const registerServiceSpy = jasmine.createSpyObj('AuthService', ['register']);
 const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
@@ -47,7 +48,8 @@ describe('Register Component Isolated Test', () => {
     }).compileComponents();
     component = new RegisterPageComponent(
       new UntypedFormBuilder(),
-      registerServiceSpy
+      registerServiceSpy,
+      new Router()
     );
   });
 
