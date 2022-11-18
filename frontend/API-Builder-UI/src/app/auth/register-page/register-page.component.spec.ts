@@ -49,7 +49,7 @@ describe('Register Component Isolated Test', () => {
     component = new RegisterPageComponent(
       new UntypedFormBuilder(),
       registerServiceSpy,
-      new Router()
+      routerSpy
     );
   });
 

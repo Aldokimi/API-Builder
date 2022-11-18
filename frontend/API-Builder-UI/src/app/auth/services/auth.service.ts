@@ -20,10 +20,10 @@ export class AuthService {
   isLoggedIn = this._isLoggedIn$.asObservable();
 
   get token(){
-    return localStorage.getItem(this.TOKEN_NAME)
+    return this.getCookie(this.TOKEN_NAME)
   }
   constructor(private http: HttpClient,private cookieService: CookieService, private router :Router) {
-    const token = localStorage.getItem(this.TOKEN_NAME);
+    const token = this.getCookie(this.TOKEN_NAME);
     this._isLoggedIn$.next(!!this.token)
    }
 
@@ -33,6 +33,14 @@ export class AuthService {
    getCookie(key: string){
     return this.cookieService.get(key);
   }
+   putCookie(key:string, value:string)
+   {
+    this.cookieService.put(key,value);
+   }
+
+   deleteCookie(key:string)
+   {
+    this.cookieService.remove(key);   }
 
  
 
@@ -48,7 +56,7 @@ export class AuthService {
       .pipe(
         tap((data) => {
           let token = data as TokenModel;
-          localStorage.setItem(this.TOKEN_NAME, JSON.stringify(token.access));
+          this.putCookie(this.TOKEN_NAME, JSON.stringify(token.access));
           this._isLoggedIn$.next(true);
           this.router.navigate(['home']);
           // var userInfo = this.jwtService.decodeToken(
@@ -83,8 +91,10 @@ export class AuthService {
       );
   }
 
+  
+
   public logout():void{
-    localStorage.removeItem(this.TOKEN_NAME);
+    this.deleteCookie(this.TOKEN_NAME);
   }
 
 
