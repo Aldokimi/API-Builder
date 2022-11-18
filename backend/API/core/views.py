@@ -167,11 +167,11 @@ class ProjectList(APIView):
             if (len(projects) != 0):
                 return Response({
                     "message":"Project name exists!", 
-                    **project.data
+                    **project.validated_data
                     }, status=status.HTTP_400_BAD_REQUEST)
             
-            make_dir_for_project_of_user( project.validated_data['owner'].email , project.data['name'] )
-            initialize_localrepo( project.validated_data['owner'].email , project.data['name'] )
+            make_dir_for_project_of_user( project.validated_data['owner'].email , project.validated_data['name'] )
+            initialize_localrepo( project.validated_data['owner'].email , project.validated_data['name'] )
             project.save()
             return Response(project.data, status=status.HTTP_201_CREATED)
         return Response(project.errors, status=status.HTTP_400_BAD_REQUEST)
