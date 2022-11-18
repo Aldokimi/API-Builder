@@ -1,12 +1,8 @@
-import json
-from django.test import TestCase
-
-from core.models import User, Project, UserManager
-from core.tests.factories import UserFactory, ProjectFactory
-from core.views import RegistrationView, LoginView, LogoutView, ChangePasswordView, UserList, UserDetail, ProjectList, ProjectDetail
+from core.models import User
+from core.views import RegistrationView, LoginView, ChangePasswordView, UserDetail
 
 from rest_framework import status
-from rest_framework.test import APITestCase, CoreAPIClient, APITransactionTestCase, RequestsClient, APIClient
+from rest_framework.test import APITestCase
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
 
@@ -15,14 +11,6 @@ from django.contrib.sessions.middleware import SessionMiddleware
 
 from django.core.management import call_command
 
-from core.utils import get_tokens_for_user
-
-
-# The Test class only tests those methods who name begins with a lower-case test.... 
-# So you can put in extra helper methods TestA and TestB which won't get run unless you explicitly call them.
-
-
-# User creation tests
 
 class test_case_user_registration(APITestCase):
     
@@ -399,3 +387,4 @@ class test_case_user_changepassword(APITestCase):
         
         response_loginToNewPassword = self.Perform_Login(self.user_payload_toLoginNewPass)
         self.assertEqual(response_loginToNewPassword.status_code, status.HTTP_200_OK)
+      
