@@ -1,0 +1,22 @@
+# Docker compose file to build up the entier project
+version: "0.1"
+
+services:
+
+  # Backend service to run the backend server
+  backend:
+    container_name: APIBuilder_backend
+    image: api-builder-api:latest # Either installed locally or can be pulled from docker hub
+    command: python /backend/API/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - /backend
+    ports:
+      - "8000:8000"
+
+  # Frontend service to run the UI
+  frontend:
+    container_name: APIBuilder_frontend
+    image: api-builder-gui:latest
+    command: ng serve --host 0.0.0.0
+    ports:
+      - "4200:4200"
