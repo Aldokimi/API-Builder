@@ -143,6 +143,11 @@ class ProjectList(APIView):
             
             if project.validated_data['owner'].id is not self.request.user.id:
                 raise PermissionDenied()
+            
+            projects = Project.objects.filter(name=project.validated_data['name'])
+            if (len(projects) != 0):
+                return Response({"message":"Project name exists!", **project.data}, status=status.HTTP_400_BAD_REQUEST)
+            
             project.save()
             make_dir_for_project_of_user( project.validated_data['owner'].email , project.data['name'] )
             initialize_localrepo( project.validated_data['owner'].email , project.data['name'] )
