@@ -1,5 +1,5 @@
 from core.models import User, Project
-from core.views import LoginView, ProjectList, ProjectDetail
+from core.views import LoginView, ProjectList, ProjectDetail, ProjectHistoryDetail
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -270,3 +270,48 @@ class test_case_project_delete(APITestCase):
         theID = self.inaccessable_projects[random_index].id
         response = self.Perform_Test(self.login_payload,theID)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class test_case_project_history(APITestCase):
+    
+    @classmethod
+    def setUpTestData(self):
+        
+        call_command("seed", verbosity=0)
+        
+        self.random_user = User.objects.order_by('?')[0]
+        self.login_payload = {
+            "email":f"{self.random_user.email}",
+            "password":"defaultpassword"
+        }
+        self.owned_projects = Project.objects.filter(owner=self.random_user.id)
+        self.unowned_projects = (Project.objects.all()).difference(self.owned_projects) 
+        
+        
+    def Perform_Test(self,loginPayload,prjID):
+        
+        response_login = globalPerformLogin(loginPayload,"test_case_project_delete")
+        
+        factory_official = APIRequestFactory()
+        user_view_official = ProjectHistoryDetail.as_view()
+        theURL = f"http://127.0.0.1:8000/api/projects/{prjID}/history"
+        
+        request_official = factory_official.get(theURL, loginPayload, format='json', HTTP_AUTHORIZATION=f"Bearer {response_login.data['access']}")
+        response_official = user_view_official(request_official,pk=prjID)
+
+        return response_official
+    
+    
+    def test_case_owned_project_history(self):
+        
+        theID = (self.owned_projects.order_by('?')[0]).id
+        response = self.Perform_Test(self.login_payload,theID)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+    
+    def test_case_unowned_project_history(self):
+        
+        random_index = random.randint(1,len(self.unowned_projects)-1)
+        theID = self.unowned_projects[random_index].id
+        response = self.Perform_Test(self.login_payload,theID)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
