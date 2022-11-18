@@ -1,0 +1,6 @@
+/venv
+/API/db.sqlite3
+/API/core/migrations
+.env
+*.py[cod]
+__pycache__
