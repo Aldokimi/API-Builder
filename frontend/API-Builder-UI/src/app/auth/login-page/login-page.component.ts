@@ -10,11 +10,13 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./login-page.component.less']
 })
 export class LoginPageComponent implements OnInit {
-  API_message:string = '';
+  API_message!:string ;
 
   constructor(private fb: UntypedFormBuilder, private authService: AuthService, private router: Router) { }
   my_login_form!: UntypedFormGroup;
   isLoading = false;
+  submitted = false;
+  errorOccured = false;
   fieldTextType: boolean = false;
 
   ngOnInit(): void {
@@ -25,17 +27,21 @@ export class LoginPageComponent implements OnInit {
 
   }
 
-  onLoginFormSubmit(): void {
+  async onLoginFormSubmit() {
     this.API_message = '';
     this.isLoading = true
-    this.authService.login(this.my_login_form.get('email')?.value, this.my_login_form.get('password')?.value)
+    this.submitted = true;
+     this.authService.login(this.my_login_form.get('email')?.value, this.my_login_form.get('password')?.value)
       .subscribe(
         (response) => {
         console.log(response);
+        this.API_message = 'Login Success';
+
         this.isLoading = false;
         }
         ,(errorRes) => {
           this.isLoading =false;
+          this.errorOccured = true;
           if(errorRes.status === 401)
               {this.API_message = "Email address or password are incorrect.";}
           else{

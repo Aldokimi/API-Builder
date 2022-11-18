@@ -10,8 +10,9 @@ export class RegisterPageComponent implements OnInit {
 
   constructor(private fb: UntypedFormBuilder, private authService : AuthService) { }
   my_register_form!: UntypedFormGroup;
-  API_message = ''
-  
+  API_message! :string
+  submitted = false;
+  errorOccured = false;
   isLoading = false;
   fieldTextType: boolean = false;
 
@@ -27,6 +28,7 @@ export class RegisterPageComponent implements OnInit {
   onRegisterFormSubmit(): void {
     this.API_message = '';
     this.isLoading = true;
+    this.submitted = true;
     this.authService.register(this.my_register_form.get('username')?.value,this.my_register_form.get('email')?.value, this.my_register_form.get('password')?.value)
     .subscribe(
       () => {

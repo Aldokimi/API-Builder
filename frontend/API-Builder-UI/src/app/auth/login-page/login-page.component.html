@@ -14,16 +14,16 @@
 							<form class="my-login-validation" [formGroup]="my_login_form"
 								(ngSubmit)="onLoginFormSubmit()" *ngIf="!isLoading">
 
-								<div class="form-group">
+								<div id="email-container" class="form-group">
 									<label for="email">E-Mail Address</label>
 									<input formControlName="email" placeholder="Your email" id="email" type="text"
 										class="form-control">
-									<div class="error-message"
+									<div id="email-error" class="error-message"
 										*ngIf="my_login_form!.get('email')!.invalid && (my_login_form!.get('email')!.dirty || my_login_form!.get('email')!.touched)">
 										Please provide a valid email address.
 									</div>
 								</div>
-								<div class="form-group">
+								<div id="password-container" class="form-group">
 									<div class="input-group" >
 										<label for="password">Password</label>
 										<input formControlName="password"  placeholder="Password" id="password"
@@ -43,14 +43,14 @@
 											</span>
 										</div>
 									</div>
-									<div class="error-message"
+									<div id="password-error" class="error-message"
 										*ngIf="my_login_form!.get('password')!.invalid && (my_login_form!.get('password')!.dirty || my_login_form!.get('password')!.touched)">
 										Password must be at least 8 characters.
 									</div>
 								</div>
 
-								<div class="form-group m-0">
-									<button type="submit" [disabled]="my_login_form.invalid"
+								<div id="login-btn-container" class="form-group m-0">
+									<button id="login-btn" type="submit" [disabled]="my_login_form.invalid"
 										class="btn btn-primary btn-block">
 										Login
 									</button>

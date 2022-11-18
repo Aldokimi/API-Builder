@@ -6,17 +6,17 @@ import { LoginPageComponent } from './auth/login-page/login-page.component';
 import { IsAuthenticatedGuard } from './auth/guards/is-authenticated.guard';
 
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: "",
     component: MainPageComponent,
-    canActivate: [IsAuthenticatedGuard]
+   // canActivate: [IsAuthenticatedGuard]
 
   },
   {
     path: "home",
     component: MainPageComponent,
-    canActivate: [IsAuthenticatedGuard]
+    //canActivate: [IsAuthenticatedGuard]
 
   },
   {
