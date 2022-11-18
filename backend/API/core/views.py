@@ -169,10 +169,14 @@ class ProjectDetail(APIView):
             raise Http404
 
     def get(self, request, pk, format=None):
+        
         project = self.get_object(pk)
-        serializer = ProjectSerializer(project)
-        return Response(serializer.data)
-
+        if( (not project.private) or project.owner.email == request.user.email):
+            serializer = ProjectSerializer(project)
+            return Response(serializer.data)
+        return Response({'msg': 'Unauthorized access!'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    
     def put(self, request, pk, format=None):
         project = self.get_object(pk)
         serializer = ProjectSerializer(project, data=request.data)
