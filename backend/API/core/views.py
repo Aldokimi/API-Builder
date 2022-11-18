@@ -214,5 +214,8 @@ class ProjectHistoryDetail(APIView):
 
     def get(self, request, pk, format=None):
         project = self.get_object(pk)
-        response_data = get_history_of_repo(project.owner.email, project.name)
-        return Response(response_data)
+        
+        if(project.owner.email == request.user.email):
+            response_data = get_history_of_repo(project.owner.email, project.name)
+            return Response(response_data)
+        return Response({'msg': 'Unauthorized access!'}, status=status.HTTP_401_UNAUTHORIZED)
