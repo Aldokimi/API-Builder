@@ -149,7 +149,9 @@ class ProjectList(APIView):
     def get(self, request, format=None):
         '''This views all the projects of ALL users'''
         
-        projects = Project.objects.all()
+        sameID = Project.objects.filter(owner=request.user.id)
+        privates = Project.objects.filter(private=False)
+        projects = sameID | privates
         serializer = CreateProjectSerializer(projects, many=True)
         return Response(serializer.data)
 
