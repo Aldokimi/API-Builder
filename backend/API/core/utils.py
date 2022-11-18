@@ -105,8 +105,7 @@ def get_history_of_repo (TheEmailOfuser,ProjectName):
 
     repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
     
-    if(os.path.isdir(repo_dir+"/.git")):
-        
+    try:
         repo = pygit2.Repository(repo_dir)
         theDictionary = {}
         
@@ -135,10 +134,10 @@ def get_history_of_repo (TheEmailOfuser,ProjectName):
             sum_commits-=1
             
         return theDictionary
-        
-    else:
-        print(f"(get_history_of_repo): Repo in: {repo_dir} does not exist!")
-        return {}
+       
+    except pygit2.GitError:
+        #print(f"(get_history_of_repo): Repo in: {repo_dir} does not exist!")
+        return theDictionary
     
     
 def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
@@ -146,8 +145,8 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
     
     repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
     
-    if(os.path.isdir(repo_dir+"/.git")):
-        
+    try:
+        #Normal commit
         repo = pygit2.Repository(repo_dir)
         index = (repo.index.add_all())
         index.write()
@@ -155,13 +154,15 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
         author = pygit2.Signature(userName,TheEmailOfuser)
         committer = pygit2.Signature(userName,TheEmailOfuser)
         message = "User made changes"
+        repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
         
-        #Safety check incase this is the first commit:
-        try:
-            tmp = repo.head.target # this can raise an error if this is the very first commit
-            repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
-        except pygit2.GitError:
-            repo.create_commit("HEAD", author, committer, message, tree, [])
-        
-    else:   #changing the directory name
-        print(f"(commit_repo_changes): Repo in: {repo_dir} does not exist!") 
+    except pygit2.GitError:
+        #First commit
+        repo = pygit2.init_repository(repo_dir, initial_head='master')
+        repo = pygit2.Repository(repo_dir)
+        index = (repo.index.add_all())
+        index.write()
+        tree = index.write_tree()
+        author = pygit2.Signature(userName,TheEmailOfuser)
+        committer = pygit2.Signature(userName,TheEmailOfuser)
+        repo.create_commit("HEAD", author, committer, message, tree, [])

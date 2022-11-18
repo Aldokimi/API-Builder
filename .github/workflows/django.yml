@@ -20,15 +20,44 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+
+    # - name: Setup virtual env
+    #   run: |
+    #     sudo -i
+    #     python -m venv env
+    #     source evn/bin/activate
+
+    - name: Install all dependencies for libgit2
+      run: |
+        sudo apt-get install build-essential cmake
+        sudo apt-get purge libssl-dev
+        sudo apt-get install libssl1.1
+        sudo apt-get install wget
+
+    - name: Download the packages for libgit2
+      run: |
+        sudo wget https://github.com/libgit2/libgit2/archive/v0.24.0.tar.gz && \
+        tar xzf v0.24.0.tar.gz
+
+    - name: Install libgit2
+      run: | 
+        cd libgit2-0.24.0/
+        sudo cmake . && sudo make && sudo make install
+
     - name: Install Dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        sudo python -m pip install --upgrade pip
+        sudo pip install -r requirements.txt
+
+    - name: Create a directory to store the users projects data
+      run: mkdir -p API-Builder-users/data
+
     - name: Run Tests
       run: |
         cd API
-        python manage.py test
+        sudo python manage.py test

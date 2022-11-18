@@ -149,20 +149,32 @@ class ProjectList(APIView):
     def get(self, request, format=None):
         '''This views all the projects of ALL users'''
         
-        projects = Project.objects.all()
+        sameID = Project.objects.filter(owner=request.user.id)
+        privates = Project.objects.filter(private=False)
+        projects = sameID | privates
         serializer = CreateProjectSerializer(projects, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
         '''This creates a project directory for a specific user'''
         my_serializer = self.get_serializer_class()
-        projects = my_serializer(data=request.data)
-        if projects.is_valid():
-            projects.save()
-            make_dir_for_project_of_user( projects.validated_data['owner'].email , projects.data['name'] )
-            initialize_localrepo( projects.validated_data['owner'].email , projects.data['name'] )
-            return Response(projects.data, status=status.HTTP_201_CREATED)
-        return Response(projects.errors, status=status.HTTP_400_BAD_REQUEST)
+        project = my_serializer(data=request.data)
+        if project.is_valid():
+            if project.validated_data['owner'].id is not self.request.user.id:
+                raise PermissionDenied()
+            
+            projects = Project.objects.filter(name=project.validated_data['name'])
+            if (len(projects) != 0):
+                return Response({
+                    "message":"Project name exists!", 
+                    **project.validated_data
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            make_dir_for_project_of_user( project.validated_data['owner'].email , project.validated_data['name'] )
+            initialize_localrepo( project.validated_data['owner'].email , project.validated_data['name'] )
+            project.save()
+            return Response(project.data, status=status.HTTP_201_CREATED)
+        return Response(project.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Project requests handling
 class ProjectDetail(APIView):
@@ -184,10 +196,14 @@ class ProjectDetail(APIView):
             raise Http404
 
     def get(self, request, pk, format=None):
+        
         project = self.get_object(pk)
-        serializer = CreateProjectSerializer(project)
-        return Response(serializer.data)
-
+        if( (not project.private) or project.owner.email == request.user.email):
+            serializer = CreateProjectSerializer(project)
+            return Response(serializer.data)
+        return Response({'msg': 'Unauthorized access!'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    
     def patch(self, request, pk, format=None):
         project = self.get_object(pk)
         my_serializer = self.get_serializer_class()
@@ -231,5 +247,8 @@ class ProjectHistoryDetail(APIView):
 
     def get(self, request, pk, format=None):
         project = self.get_object(pk)
-        response_data = get_history_of_repo(project.owner.email, project.name)
-        return Response(response_data)
+        
+        if(project.owner.email == request.user.email):
+            response_data = get_history_of_repo(project.owner.email, project.name)
+            return Response(response_data)
+        return Response({'msg': 'Unauthorized access!'}, status=status.HTTP_401_UNAUTHORIZED)

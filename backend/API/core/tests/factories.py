@@ -9,7 +9,7 @@ class UserFactory(DjangoModelFactory):
     email = factory.Faker('email')
     date_of_birth = factory.Faker('date_time')
     username = factory.Faker('user_name')
-    is_active = factory.Faker('pybool')
+    is_active = True
     is_admin = factory.Faker('pybool')
     linkedin_token = factory.Faker('uuid4')
     date_joined = factory.Faker('date_time')
