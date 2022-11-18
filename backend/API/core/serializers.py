@@ -31,7 +31,7 @@ class PasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError({'current_password': 'Does not match'})
         return value
 
-class UserSerializer(serializers.ModelSerializer):
+class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
@@ -55,7 +55,28 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class UpdateUserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=100, required=False)
+    email = serializers.CharField(max_length=100, required=False)
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'email',
+            'is_active',
+            'is_admin',
+            'linkedin_token',
+            'date_joined',
+            'last_login',
+            'first_name',
+            'last_name',
+            'bio',
+            'date_of_birth',
+            'profile_picture',
+        ]
+
+class CreateProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = [
@@ -66,4 +87,17 @@ class ProjectSerializer(serializers.ModelSerializer):
             'endpoint_name',
             'private',
             'owner',
+        ]
+
+class UpdateProjectSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=100, required=False)
+    class Meta:
+        model = Project
+        fields = [
+            'id',
+            'name',
+            'date_created',
+            'last_updated',
+            'endpoint_name',
+            'private',
         ]
