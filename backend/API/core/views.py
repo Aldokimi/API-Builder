@@ -9,8 +9,9 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 
-from .serializers import UserSerializer, ProjectSerializer, \
-     RegistrationSerializer, PasswordChangeSerializer
+from .serializers import CreateUserSerializer, UpdateUserSerializer, \
+     RegistrationSerializer, PasswordChangeSerializer,\
+        CreateProjectSerializer, UpdateProjectSerializer
 from .utils import get_history_of_repo, get_tokens_for_user, make_dir_for_project_of_user,\
      make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user,\
          initialize_localrepo, commit_repo_changes, rename_dir_for_user,\
@@ -78,7 +79,7 @@ class UserList(APIView):
     """
     def get(self, request, format=None):
         users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
+        serializer = CreateUserSerializer(users, many=True)
         return Response(serializer.data)
 
 class UserDetail(APIView):
@@ -92,22 +93,32 @@ class UserDetail(APIView):
         except User.DoesNotExist:
             raise Http404
 
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return CreateUserSerializer
+        elif self.request.method in ["PUT", "PATCH"]:
+            return UpdateUserSerializer
+
     def get(self, request, pk, format=None):
         user = self.get_object(pk)
-        serializer = UserSerializer(user)
+        serializer = CreateUserSerializer(user)
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
+    def patch(self, request, pk, format=None):
         
         user = self.get_object(pk)
         if user.id is not self.request.user.id:
             raise PermissionDenied()
-        
-        serializer = UserSerializer(user, data=request.data)
+        my_serializer = self.get_serializer_class()
+        serializer = my_serializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            if user.email != serializer.validated_data["email"]:
-                rename_dir_for_user(user.email, serializer.validated_data["email"])
+            try:
+                if request.data["email"]:
+                    if user.email != serializer.validated_data["email"]:
+                        rename_dir_for_user(user.email, serializer.validated_data["email"])
+            except:
+                pass
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -128,17 +139,24 @@ class ProjectList(APIView):
     List all projects, or create a new Project.
     """
     permission_classes = [IsAuthenticated, ]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return CreateProjectSerializer
+        elif self.request.method in ["PUT", "PATCH"]:
+            return UpdateProjectSerializer
+
     def get(self, request, format=None):
         '''This views all the projects of ALL users'''
         
         projects = Project.objects.all()
-        serializer = ProjectSerializer(projects, many=True)
+        serializer = CreateProjectSerializer(projects, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
         '''This creates a project directory for a specific user'''
-        
-        projects = ProjectSerializer(data=request.data)
+        my_serializer = self.get_serializer_class()
+        projects = my_serializer(data=request.data)
         if projects.is_valid():
             projects.save()
             make_dir_for_project_of_user( projects.validated_data['owner'].email , projects.data['name'] )
@@ -152,6 +170,13 @@ class ProjectDetail(APIView):
     Retrieve, update or delete a Project instance.
     """
     permission_classes = [IsAuthenticated, ]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return CreateProjectSerializer
+        elif self.request.method in ["PUT", "PATCH"]:
+            return UpdateProjectSerializer
+
     def get_object(self, pk):
         try:
             return Project.objects.get(pk=pk)
@@ -160,18 +185,24 @@ class ProjectDetail(APIView):
 
     def get(self, request, pk, format=None):
         project = self.get_object(pk)
-        serializer = ProjectSerializer(project)
+        serializer = CreateProjectSerializer(project)
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
+    def patch(self, request, pk, format=None):
         project = self.get_object(pk)
-        serializer = ProjectSerializer(project, data=request.data)
+        my_serializer = self.get_serializer_class()
+        serializer = my_serializer(project, data=request.data)
         if serializer.is_valid():
+            try:
+                if request.data["name"]:
+                    print("*****************************************", project.name, serializer.validated_data["name"])
+                    if project.name != serializer.validated_data["name"]:
+                        rename_dir_for_project_of_user(project.owner.email, project.name, serializer.validated_data["name"])
+                name = (project.owner.first_name + " " + project.owner.last_name)
+                commit_repo_changes( project.owner.email , name ,project.name ) # check project name change + dir name change
+            except:
+                pass
             serializer.save()
-            if project.name != serializer.validated_data["name"]:
-                rename_dir_for_user(project.name, serializer.validated_data["name"])
-            name = (project.owner.first_name + " " + project.owner.last_name)
-            commit_repo_changes( project.owner.email , name ,project.name ) # check project name change + dir name change
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
