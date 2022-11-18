@@ -10,13 +10,13 @@ export const routes: Routes = [
   {
     path: "",
     component: MainPageComponent,
-    canActivate: [IsAuthenticatedGuard]
+   // canActivate: [IsAuthenticatedGuard]
 
   },
   {
     path: "home",
     component: MainPageComponent,
-    canActivate: [IsAuthenticatedGuard]
+    //canActivate: [IsAuthenticatedGuard]
 
   },
   {
