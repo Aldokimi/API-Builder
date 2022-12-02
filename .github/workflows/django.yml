@@ -26,12 +26,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # - name: Setup virtual env
-    #   run: |
-    #     sudo -i
-    #     python -m venv env
-    #     source evn/bin/activate
-
     - name: Install all dependencies for libgit2
       run: |
         sudo apt-get install build-essential cmake
@@ -53,6 +47,11 @@ jobs:
       run: |
         sudo python -m pip install --upgrade pip
         sudo pip install -r requirements.txt
+
+    - name: Lint Action
+      uses: wearerequired/lint-action@v2.1.0
+      with:
+        pylint: true
 
     - name: Create a directory to store the users projects data
       run: mkdir -p API-Builder-users/data
