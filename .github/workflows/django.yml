@@ -60,3 +60,16 @@ jobs:
       run: |
         cd API
         sudo python manage.py test
+
+    - name: Python security check using Bandit
+      uses: kmcquade/bandit-report-artifacts-json@0.0.1
+      with:
+        python_version: ${{ matrix.python-version }}
+        project_path: .
+        ignore_failure: false
+
+    - name: Security check report artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Security report
+        path: output/
