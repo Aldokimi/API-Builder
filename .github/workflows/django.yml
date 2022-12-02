@@ -32,32 +32,46 @@ jobs:
     #     python -m venv env
     #     source evn/bin/activate
 
-    - name: Install all dependencies for libgit2
-      run: |
-        sudo apt-get install build-essential cmake
-        sudo apt-get purge libssl-dev
-        sudo apt-get install libssl1.1
-        sudo apt-get install wget
+    # - name: Install all dependencies for libgit2
+    #   run: |
+    #     sudo apt-get install build-essential cmake
+    #     sudo apt-get purge libssl-dev
+    #     sudo apt-get install libssl1.1
+    #     sudo apt-get install wget
 
-    - name: Download the packages for libgit2
-      run: |
-        sudo wget https://github.com/libgit2/libgit2/archive/v0.24.0.tar.gz && \
-        tar xzf v0.24.0.tar.gz
+    # - name: Download the packages for libgit2
+    #   run: |
+    #     sudo wget https://github.com/libgit2/libgit2/archive/v0.24.0.tar.gz && \
+    #     tar xzf v0.24.0.tar.gz
 
-    - name: Install libgit2
-      run: | 
-        cd libgit2-0.24.0/
-        sudo cmake . && sudo make && sudo make install
+    # - name: Install libgit2
+    #   run: | 
+    #     cd libgit2-0.24.0/
+    #     sudo cmake . && sudo make && sudo make install
 
-    - name: Install Dependencies
-      run: |
-        sudo python -m pip install --upgrade pip
-        sudo pip install -r requirements.txt
+    # - name: Install Dependencies
+    #   run: |
+    #     sudo python -m pip install --upgrade pip
+    #     sudo pip install -r requirements.txt
 
-    - name: Create a directory to store the users projects data
-      run: mkdir -p API-Builder-users/data
+    # - name: Create a directory to store the users projects data
+    #   run: mkdir -p API-Builder-users/data
 
-    - name: Run Tests
-      run: |
-        cd API
-        sudo python manage.py test
+    # - name: Run Tests
+    #   run: |
+    #     cd API
+    #     sudo python manage.py test
+
+    - name: Python security check using Bandit and output as JSON
+      uses: kmcquade/bandit-report-artifacts-json@0.0.1
+      with:
+        python_version: ${{ matrix.python-version }}
+        project_path: .
+        ignore_failure: false
+
+    - name: Security check report artifacts
+      uses: actions/upload-artifact@v2
+      # if: failure()
+      with:
+        name: Security report
+        path: output/
