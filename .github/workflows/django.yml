@@ -48,10 +48,10 @@ jobs:
         sudo python -m pip install --upgrade pip
         sudo pip install -r requirements.txt
 
-    - name: Lint Action
-      uses: wearerequired/lint-action@v2.1.0
-      with:
-        pylint: true
+    # - name: Lint Action
+    #   uses: wearerequired/lint-action@v2.1.0
+    #   with:
+    #     pylint: true
 
     - name: Create a directory to store the users projects data
       run: mkdir -p API-Builder-users/data
@@ -61,15 +61,39 @@ jobs:
         cd API
         sudo python manage.py test
 
-    - name: Python security check using Bandit
-      uses: kmcquade/bandit-report-artifacts-json@0.0.1
-      with:
-        python_version: ${{ matrix.python-version }}
-        project_path: .
-        ignore_failure: false
+    # - name: Python security check using Bandit
+    #   uses: kmcquade/bandit-report-artifacts-json@0.0.1
+    #   with:
+    #     python_version: ${{ matrix.python-version }}
+    #     project_path: .
+    #     ignore_failure: false
 
-    - name: Security check report artifacts
-      uses: actions/upload-artifact@v2
+    # UPload the artifacts to the build folder
+    - name: Tar files
+      run: mkdir outbuild && tar -cvf build.tar outbuild
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
       with:
-        name: Security report
-        path: output/
+        name: build
+        path: backend/out
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build
+        path: backend/out
+
+    - name: Deploy to Netlify
+      uses: netlify/actions/cli@master
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      with:
+        args: deploy --dir=build --prod

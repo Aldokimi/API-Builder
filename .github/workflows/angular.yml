@@ -43,4 +43,33 @@ jobs:
         uses: fersilva16/ts-report-action@1.1.0
         with:
           files: tsconfig.json
-       
+
+      # Upload artifacts to the build folder
+      - name: Tar files
+        run: mkdir outbuild && tar -cvf build.tar outbuild
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: frontend/API-Builder-UI/out
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build
+        path: frontend/API-Builder-UI/out
+
+    - name: Deploy to Netlify
+      uses: netlify/actions/cli@master
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      with:
+        args: deploy --dir=build --prod
