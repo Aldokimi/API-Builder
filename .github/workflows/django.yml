@@ -26,33 +26,32 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # - name: Setup virtual env
+    # - name: Install all dependencies for libgit2
     #   run: |
-    #     sudo -i
-    #     python -m venv env
-    #     source evn/bin/activate
+    #     sudo apt-get install build-essential cmake
+    #     sudo apt-get purge libssl-dev
+    #     sudo apt-get install libssl1.1
+    #     sudo apt-get install wget
 
-    - name: Install all dependencies for libgit2
-      run: |
-        sudo apt-get install build-essential cmake
-        sudo apt-get purge libssl-dev
-        sudo apt-get install libssl1.1
-        sudo apt-get install wget
+    # - name: Download the packages for libgit2
+    #   run: |
+    #     sudo wget https://github.com/libgit2/libgit2/archive/v0.24.0.tar.gz && \
+    #     tar xzf v0.24.0.tar.gz
 
-    - name: Download the packages for libgit2
-      run: |
-        sudo wget https://github.com/libgit2/libgit2/archive/v0.24.0.tar.gz && \
-        tar xzf v0.24.0.tar.gz
-
-    - name: Install libgit2
-      run: | 
-        cd libgit2-0.24.0/
-        sudo cmake . && sudo make && sudo make install
+    # - name: Install libgit2
+    #   run: | 
+    #     cd libgit2-0.24.0/
+    #     sudo cmake . && sudo make && sudo make install
 
     - name: Install Dependencies
       run: |
         sudo python -m pip install --upgrade pip
         sudo pip install -r requirements.txt
+
+    - name: Lint Action
+      uses: wearerequired/lint-action@v2.1.0
+      with:
+        pylint: true
 
     - name: Create a directory to store the users projects data
       run: mkdir -p API-Builder-users/data
