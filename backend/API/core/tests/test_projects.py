@@ -114,7 +114,10 @@ class test_case_project_create(APITestCase):
     def test_case_another_owner(self):
         
         response = self.Perform_Test(self.dataLogin,self.another_owner_payload)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN or status.HTTP_400_BAD_REQUEST)
+        if response.status_code == status.HTTP_403_FORBIDDEN or response.status_code == status.HTTP_400_BAD_REQUEST:
+            self.assertTrue(True)
+        else:
+            self.assertTrue(False)
         
 
     def test_case_invalid_owner(self):
