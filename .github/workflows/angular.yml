@@ -25,6 +25,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - run: npm test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+      - name: Lint Action
+        run: npm run lint
 
       # Security report
       - name: Get changed typescript files
@@ -41,3 +43,4 @@ jobs:
         uses: fersilva16/ts-report-action@1.1.0
         with:
           files: tsconfig.json
+       
