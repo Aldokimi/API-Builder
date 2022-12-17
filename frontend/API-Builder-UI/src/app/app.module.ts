@@ -8,12 +8,15 @@ import { AppComponent } from './app.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { CookieModule } from 'ngx-cookie';
+import { UserModule } from './profiles/user.module';
+import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MainPageComponent,
     NavBarComponent,
+    PagenotfoundComponent,
   ],
   imports: [
     BrowserModule,
@@ -21,7 +24,8 @@ import { CookieModule } from 'ngx-cookie';
     FormsModule,
     AuthModule,
     ReactiveFormsModule,
-    CookieModule.withOptions()
+    CookieModule.withOptions(),
+    UserModule
   ],
   providers: [],
   bootstrap: [AppComponent]

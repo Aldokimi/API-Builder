@@ -38,7 +38,7 @@ export class LoginPageComponent implements OnInit {
      this.authService.login(this.my_login_form.get('email')?.value, this.my_login_form.get('password')?.value)
       .subscribe(
         (response) => {
-        console.log(response);
+
         this.API_message = 'Login Success';
 
         this.isLoading = false;

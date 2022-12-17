@@ -3,14 +3,17 @@ import { RouterModule, Routes } from '@angular/router';
 import { MainPageComponent } from './main-page/main-page.component';
 import { RegisterPageComponent } from './auth/register-page/register-page.component';
 import { LoginPageComponent } from './auth/login-page/login-page.component';
+//import { IsAuthenticatedGuard } from './auth/guards/is-authenticated.guard';
+import { ProfileComponent } from './profiles/profile/profile.component';
 import { IsAuthenticatedGuard } from './auth/guards/is-authenticated.guard';
+import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
 
 
 export const routes: Routes = [
   {
     path: "",
     component: MainPageComponent,
-   // canActivate: [IsAuthenticatedGuard]
+    //canActivate: [IsAuthenticatedGuard]
 
   },
   {
@@ -20,14 +23,14 @@ export const routes: Routes = [
 
   },
   {
-    path: "myprojects",
+    path: "projects",
     component: MainPageComponent,
     canActivate: [IsAuthenticatedGuard]
   },
   {
     path: "register",
     component: RegisterPageComponent,
-   // canActivate: [IsAuthenticatedGuard]
+    //canActivate: [IsAuthenticatedGuard]
 
   },
   {
@@ -35,6 +38,14 @@ export const routes: Routes = [
     component: LoginPageComponent,
     //canActivate: [IsAuthenticatedGuard]
   },
+  {
+    path: `profiles/:id`,
+    component: ProfileComponent,
+    canActivate: [IsAuthenticatedGuard]
+  },
+  //Wild Card Route for 404 request
+  { path: '**', pathMatch: 'full', 
+  component: PagenotfoundComponent },
 ];
 
 @NgModule({
