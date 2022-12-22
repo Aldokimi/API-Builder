@@ -155,9 +155,13 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
         index.write()
         tree = index.write_tree()
         message = "The author made changes for project: "+ProjectName
-        repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
+        commit = repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
+        shortened = (commit.hex)[:7]
+        repo.references.create(f"refs/heads/{shortened}", commit)
     except Exception as E:
-        repo.create_commit("refs/heads/master", author, committer, message, tree, [])
+        commit = repo.create_commit("refs/heads/master", author, committer, message, tree, [])
+        shortened = (commit.hex)[:7]
+        repo.references.create(f"refs/heads/{shortened}", commit)
         
         
 def create_file(FileContent,FileLocation,FileName,FileType):
@@ -195,3 +199,30 @@ def update_file(FileContent,FileLocation,FileName,FileType,OldFileName=None):
     except OSError as error:
         print('update_file:',error)
         
+        
+def get_old_data_from_hash (Hash,Path):
+    
+    try:
+        output = {}
+        repo = pygit2.Repository(Path)
+        try:
+            valid = repo.revparse_single(Hash)
+        except:
+            return [output,False]
+        branch = repo.lookup_branch(Hash[:7])
+        ref = repo.lookup_reference(branch.name)
+        repo.checkout(ref)
+        contents = os.listdir(Path)
+        if (len(contents) != 1):
+            file_name = contents[1]
+            print(contents)
+            actualFileLoc = Path + "/" + file_name
+            f = open(actualFileLoc,"r")
+            output = f.read()
+            f.close()
+        branch = repo.lookup_branch('master')
+        ref = repo.lookup_reference(branch.name)
+        repo.checkout(ref)
+        return [output,True]
+    except Exception as E:
+        print("Repository has failed: get_old_data_from_hash",E)
