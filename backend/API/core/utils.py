@@ -148,21 +148,50 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
     try:
         #Normal commit
         repo = pygit2.Repository(repo_dir)
-        index = (repo.index.add_all())
-        index.write()
-        tree = index.write_tree()
         author = pygit2.Signature(userName,TheEmailOfuser)
         committer = pygit2.Signature(userName,TheEmailOfuser)
-        message = "User made changes"
+        index = (repo.index)
+        index.add_all()
+        index.write()
+        tree = index.write_tree()
+        message = "The author made changes for project: "+ProjectName
         repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
+    except Exception as E:
+        repo.create_commit("refs/heads/master", author, committer, message, tree, [])
         
-    except pygit2.GitError:
-        #First commit
-        repo = pygit2.init_repository(repo_dir, initial_head='master')
-        repo = pygit2.Repository(repo_dir)
-        index = (repo.index.add_all())
-        index.write()
-        tree = index.write_tree()
-        author = pygit2.Signature(userName,TheEmailOfuser)
-        committer = pygit2.Signature(userName,TheEmailOfuser)
-        repo.create_commit("HEAD", author, committer, message, tree, [])
+        
+def create_file(FileContent,FileLocation,FileName,FileType):
+    '''Function to create a file'''
+    
+    ExactLocation = f"{FileLocation}/{FileName}.{FileType}"
+    try:
+        if(os.path.exists(ExactLocation)):
+            raise OSError
+        f = open (ExactLocation,"w")
+        f.write(FileContent)
+        f.close()
+    except OSError as error:
+        print('create_file:',error)
+    
+
+def update_file(FileContent,FileLocation,FileName,FileType,OldFileName=None):
+    '''Function to update the given file.'''
+    
+    NewLocation = f"{FileLocation}/{FileName}.{FileType}"
+    OldLocation = "place_holder"
+    if (OldFileName):
+        OldLocation = f"{FileLocation}/{OldFileName}.{FileType}"
+    try:
+        if(os.path.exists(NewLocation)):
+            os.remove(NewLocation)
+            f = open (NewLocation,"w")
+            f.write(FileContent)
+            f.close()
+        elif(os.path.exists(OldLocation)):
+            os.remove(OldLocation)
+            f = open (NewLocation,"w")
+            f.write(FileContent)
+            f.close()
+    except OSError as error:
+        print('update_file:',error)
+        
