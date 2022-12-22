@@ -42,6 +42,8 @@ class LoginView(APIView):
             login(request, user)
             auth_data = utils.get_tokens_for_user(request.user)
             auth_data['id'] = request.user.id
+            auth_data['email'] = request.user.email
+            auth_data['username'] = request.user.username
             return Response({'msg': 'Login Success', **auth_data}, status=status.HTTP_200_OK)
         return Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -51,7 +53,7 @@ class LogoutView(APIView):
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
 
 class ChangePasswordView(APIView):
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def post(self, request):
         serializer = PasswordChangeSerializer(context={'request': request}, data=request.data)
@@ -84,7 +86,7 @@ class UserDetail(APIView):
     """
     Retrieve, update or delete a user instance.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
     def get_object(self, pk):
         try:
             return User.objects.get(pk=pk)
@@ -143,7 +145,7 @@ class ProjectList(APIView):
     """
     List all projects, or create a new Project.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -176,6 +178,9 @@ class ProjectList(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST)  
             utils.make_dir_for_project_of_user( project.validated_data['owner'].email , project.validated_data['name'] )
             utils.initialize_localrepo( project.validated_data['owner'].email , project.validated_data['name'] )
+            project_loc = f"/home/API-Builder/{project.validated_data['owner'].email}/{project.validated_data['name']}"
+            utils.create_file(project.validated_data['file_content'],project_loc,project.validated_data['file_name'],project.validated_data['file_type'])
+            utils.commit_repo_changes( project.validated_data['owner'].email , project.validated_data['owner'].username ,project.validated_data['name'], f"Project: '{project.validated_data['name']}' initialization" ) 
             project.save()
             return Response(project.data, status=status.HTTP_201_CREATED)
         return Response(project.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -185,7 +190,7 @@ class ProjectDetail(APIView):
     """
     Retrieve, update or delete a Project instance.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -231,7 +236,7 @@ class ProjectDetail(APIView):
                         utils.update_file(serializer.validated_data["file_content"],FileLoc,serializer.validated_data["file_name"],serializer.validated_data["file_type"],project.file_name)
                     else:
                         utils.update_file(serializer.validated_data["file_content"],FileLoc,project.file_name,serializer.validated_data["file_type"])
-                    name = (project.owner.first_name + " " + project.owner.last_name)
+                    name = project.owner.username
                     utils.commit_repo_changes( project.owner.email , name ,project.name ) 
             except Exception as E:
                 return Response({'msg': f"Unknown Exception happend, its value is: ({E})"}, status=status.HTTP_400_BAD_REQUEST)
@@ -255,7 +260,7 @@ class ProjectHistoryDetail(APIView):
     """
     Get the history data of a project
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
     def get_object(self, pk):
         try:
             return Project.objects.get(pk=pk)
@@ -275,7 +280,7 @@ class ProjectOldDataDetail(APIView):
     """
     Get the old file data of a project
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
     def get_object(self, pk):
         try:
             return Project.objects.get(pk=pk)

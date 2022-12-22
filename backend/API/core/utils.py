@@ -140,7 +140,7 @@ def get_history_of_repo (TheEmailOfuser,ProjectName):
         return theDictionary
     
     
-def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
+def commit_repo_changes (TheEmailOfuser,userName,ProjectName,Message=None):
     '''Commits the changes made by the user, requires email, name, and project name' '''
     
     repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
@@ -154,7 +154,10 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
         index.add_all()
         index.write()
         tree = index.write_tree()
-        message = "The author made changes for project: "+ProjectName
+        if(Message):
+            message = Message
+        else:
+            message = "The author made changes for project: "+ProjectName
         commit = repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
         shortened = (commit.hex)[:7]
         repo.references.create(f"refs/heads/{shortened}", commit)
