@@ -31,3 +31,6 @@ class ProjectFactory(DjangoModelFactory):
     last_updated = factory.Faker('date_time')
     endpoint_name= factory.Faker('uri')
     private = factory.Faker('pybool')
+    file_name = factory.Faker('catch_phrase')
+    file_content = factory.Faker('json')
+    file_type = "json"

@@ -12,12 +12,10 @@ from rest_framework.parsers import JSONParser
 from .serializers import CreateUserSerializer, UpdateUserSerializer, \
      RegistrationSerializer, PasswordChangeSerializer,\
         CreateProjectSerializer, UpdateProjectSerializer
-from .utils import get_history_of_repo, get_tokens_for_user, make_dir_for_project_of_user,\
-     make_dir_for_user, remove_dirs_of_user, remove_dir_for_project_of_user,\
-         initialize_localrepo, commit_repo_changes, rename_dir_for_user,\
-            rename_dir_for_project_of_user
+from . import utils
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+import os
 
 # Authentication views
 class RegistrationView(APIView):
@@ -27,7 +25,7 @@ class RegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            make_dir_for_user(serializer.data['email'])
+            utils.make_dir_for_user(serializer.data['email'])
             return Response({"message":"Successfully logged in", **serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,8 +40,10 @@ class LoginView(APIView):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
-            auth_data = get_tokens_for_user(request.user)
+            auth_data = utils.get_tokens_for_user(request.user)
             auth_data['id'] = request.user.id
+            auth_data['email'] = request.user.email
+            auth_data['username'] = request.user.username
             return Response({'msg': 'Login Success', **auth_data}, status=status.HTTP_200_OK)
         return Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -53,7 +53,7 @@ class LogoutView(APIView):
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
 
 class ChangePasswordView(APIView):
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def post(self, request):
         serializer = PasswordChangeSerializer(context={'request': request}, data=request.data)
@@ -86,7 +86,7 @@ class UserDetail(APIView):
     """
     Retrieve, update or delete a user instance.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
     def get_object(self, pk):
         try:
             return User.objects.get(pk=pk)
@@ -112,13 +112,20 @@ class UserDetail(APIView):
         my_serializer = self.get_serializer_class()
         serializer = my_serializer(user, data=request.data)
         if serializer.is_valid():
-            serializer.save()
             try:
-                if request.data["email"]:
-                    if user.email != serializer.validated_data["email"]:
-                        rename_dir_for_user(user.email, serializer.validated_data["email"])
-            except:
-                pass
+                if "username" in request.data:  #Existing user check
+                   for aUser in User.objects.all():
+                       if(serializer.validated_data['username'] == aUser.username):
+                           return Response({'msg': f"a User with the same username '{serializer.validated_data['username']}' already exists!"}, status=status.HTTP_400_BAD_REQUEST)
+                if "email" in request.data:   #Existing email check
+                    if(os.path.exists(f"/home/API-Builder/{serializer.validated_data['email']}")):
+                        return Response({'msg': f"a User with the same email address '{serializer.validated_data['email']}' already exists!"}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        if user.email != serializer.validated_data["email"]:
+                            utils.rename_dir_for_user(user.email, serializer.validated_data["email"]) 
+            except Exception as E:
+                return Response({'msg': f"Unknown Exception happend, its value is: {E}"}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -128,7 +135,7 @@ class UserDetail(APIView):
         user = self.get_object(pk)
         if user.id is not self.request.user.id:
             raise PermissionDenied()
-        remove_dirs_of_user(user.email)
+        utils.remove_dirs_of_user(user.email)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -138,7 +145,7 @@ class ProjectList(APIView):
     """
     List all projects, or create a new Project.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -168,10 +175,12 @@ class ProjectList(APIView):
                 return Response({
                     "message":"Project name exists!", 
                     **project.validated_data
-                    }, status=status.HTTP_400_BAD_REQUEST)
-            
-            make_dir_for_project_of_user( project.validated_data['owner'].email , project.validated_data['name'] )
-            initialize_localrepo( project.validated_data['owner'].email , project.validated_data['name'] )
+                    }, status=status.HTTP_400_BAD_REQUEST)  
+            utils.make_dir_for_project_of_user( project.validated_data['owner'].email , project.validated_data['name'] )
+            utils.initialize_localrepo( project.validated_data['owner'].email , project.validated_data['name'] )
+            project_loc = f"/home/API-Builder/{project.validated_data['owner'].email}/{project.validated_data['name']}"
+            utils.create_file(project.validated_data['file_content'],project_loc,project.validated_data['file_name'],project.validated_data['file_type'])
+            utils.commit_repo_changes( project.validated_data['owner'].email , project.validated_data['owner'].username ,project.validated_data['name'], f"Project: '{project.validated_data['name']}' initialization" ) 
             project.save()
             return Response(project.data, status=status.HTTP_201_CREATED)
         return Response(project.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -181,7 +190,7 @@ class ProjectDetail(APIView):
     """
     Retrieve, update or delete a Project instance.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -210,14 +219,27 @@ class ProjectDetail(APIView):
         serializer = my_serializer(project, data=request.data)
         if serializer.is_valid():
             try:
-                if request.data["name"]:
-                    print("*****************************************", project.name, serializer.validated_data["name"])
+                check = False
+                if "name" in request.data:
                     if project.name != serializer.validated_data["name"]:
-                        rename_dir_for_project_of_user(project.owner.email, project.name, serializer.validated_data["name"])
-                name = (project.owner.first_name + " " + project.owner.last_name)
-                commit_repo_changes( project.owner.email , name ,project.name ) # check project name change + dir name change
-            except:
-                pass
+                        if(os.path.exists(f"/home/API-Builder/{project.owner.email}/{serializer.validated_data['name']}")):
+                            return Response({'msg': f"Project with the name '{serializer.validated_data['name']}' already exists for the user '{project.owner.email}' !"}, status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            utils.rename_dir_for_project_of_user(project.owner.email, project.name, serializer.validated_data["name"])
+                            check = True
+                if "file_content" and "file_type" in request.data:
+                    if check:
+                        FileLoc = f"/home/API-Builder/{project.owner.email}/{serializer.validated_data['name']}"
+                    else:
+                        FileLoc = f"/home/API-Builder/{project.owner.email}/{project.name}"
+                    if "file_name" in request.data:
+                        utils.update_file(serializer.validated_data["file_content"],FileLoc,serializer.validated_data["file_name"],serializer.validated_data["file_type"],project.file_name)
+                    else:
+                        utils.update_file(serializer.validated_data["file_content"],FileLoc,project.file_name,serializer.validated_data["file_type"])
+                    name = project.owner.username
+                    utils.commit_repo_changes( project.owner.email , name ,project.name ) 
+            except Exception as E:
+                return Response({'msg': f"Unknown Exception happend, its value is: ({E})"}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -228,7 +250,7 @@ class ProjectDetail(APIView):
         project = self.get_object(pk)
         if project.owner.id is not self.request.user.id:
             raise PermissionDenied()
-        remove_dir_for_project_of_user(project.owner.email,project.name)
+        utils.remove_dir_for_project_of_user(project.owner.email,project.name)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -238,7 +260,7 @@ class ProjectHistoryDetail(APIView):
     """
     Get the history data of a project
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
     def get_object(self, pk):
         try:
             return Project.objects.get(pk=pk)
@@ -249,6 +271,30 @@ class ProjectHistoryDetail(APIView):
         project = self.get_object(pk)
         
         if(project.owner.email == request.user.email):
-            response_data = get_history_of_repo(project.owner.email, project.name)
+            response_data = utils.get_history_of_repo(project.owner.email, project.name)
             return Response(response_data)
+        return Response({'msg': 'Unauthorized access!'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+
+class ProjectOldDataDetail(APIView):
+    """
+    Get the old file data of a project
+    """
+    #permission_classes = [IsAuthenticated, ]
+    def get_object(self, pk):
+        try:
+            return Project.objects.get(pk=pk)
+        except Project.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk ,hash, format=None):
+        project = self.get_object(pk)
+       
+        if(project.owner.email == request.user.email):
+            path = f"/home/API-Builder/{request.user.email}/{project.name}"
+            response_data = utils.get_old_data_from_hash(hash, path)
+            if(response_data[1]):
+                return Response(response_data[0],status=status.HTTP_200_OK)
+            else:
+                return Response({'msg': 'No such hash!'},status=status.HTTP_400_BAD_REQUEST)
         return Response({'msg': 'Unauthorized access!'}, status=status.HTTP_401_UNAUTHORIZED)

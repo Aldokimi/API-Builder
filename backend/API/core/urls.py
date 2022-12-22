@@ -22,4 +22,5 @@ urlpatterns = [
 
     # API Builder URLs
     path('projects/<int:pk>/history', views.ProjectHistoryDetail.as_view(), name='history'),
+    path('projects/<int:pk>/history/<str:hash>', views.ProjectOldDataDetail.as_view()),
 ]

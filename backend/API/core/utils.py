@@ -140,7 +140,7 @@ def get_history_of_repo (TheEmailOfuser,ProjectName):
         return theDictionary
     
     
-def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
+def commit_repo_changes (TheEmailOfuser,userName,ProjectName,Message=None):
     '''Commits the changes made by the user, requires email, name, and project name' '''
     
     repo_dir = f"/home/API-Builder/{TheEmailOfuser}/{ProjectName}"
@@ -148,21 +148,84 @@ def commit_repo_changes (TheEmailOfuser,userName,ProjectName):
     try:
         #Normal commit
         repo = pygit2.Repository(repo_dir)
-        index = (repo.index.add_all())
-        index.write()
-        tree = index.write_tree()
         author = pygit2.Signature(userName,TheEmailOfuser)
         committer = pygit2.Signature(userName,TheEmailOfuser)
-        message = "User made changes"
-        repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
+        index = (repo.index)
+        index.add_all()
+        index.write()
+        tree = index.write_tree()
+        if(Message):
+            message = Message
+        else:
+            message = "The author made changes for project: "+ProjectName
+        commit = repo.create_commit("HEAD", author, committer, message, tree, [repo.head.target])
+        shortened = (commit.hex)[:7]
+        repo.references.create(f"refs/heads/{shortened}", commit)
+    except Exception as E:
+        commit = repo.create_commit("refs/heads/master", author, committer, message, tree, [])
+        shortened = (commit.hex)[:7]
+        repo.references.create(f"refs/heads/{shortened}", commit)
         
-    except pygit2.GitError:
-        #First commit
-        repo = pygit2.init_repository(repo_dir, initial_head='master')
-        repo = pygit2.Repository(repo_dir)
-        index = (repo.index.add_all())
-        index.write()
-        tree = index.write_tree()
-        author = pygit2.Signature(userName,TheEmailOfuser)
-        committer = pygit2.Signature(userName,TheEmailOfuser)
-        repo.create_commit("HEAD", author, committer, message, tree, [])
+        
+def create_file(FileContent,FileLocation,FileName,FileType):
+    '''Function to create a file'''
+    
+    ExactLocation = f"{FileLocation}/{FileName}.{FileType}"
+    try:
+        if(os.path.exists(ExactLocation)):
+            raise OSError
+        f = open (ExactLocation,"w")
+        f.write(FileContent)
+        f.close()
+    except OSError as error:
+        print('create_file:',error)
+    
+
+def update_file(FileContent,FileLocation,FileName,FileType,OldFileName=None):
+    '''Function to update the given file.'''
+    
+    NewLocation = f"{FileLocation}/{FileName}.{FileType}"
+    OldLocation = "place_holder"
+    if (OldFileName):
+        OldLocation = f"{FileLocation}/{OldFileName}.{FileType}"
+    try:
+        if(os.path.exists(NewLocation)):
+            os.remove(NewLocation)
+            f = open (NewLocation,"w")
+            f.write(FileContent)
+            f.close()
+        elif(os.path.exists(OldLocation)):
+            os.remove(OldLocation)
+            f = open (NewLocation,"w")
+            f.write(FileContent)
+            f.close()
+    except OSError as error:
+        print('update_file:',error)
+        
+        
+def get_old_data_from_hash (Hash,Path):
+    
+    try:
+        output = {}
+        repo = pygit2.Repository(Path)
+        try:
+            valid = repo.revparse_single(Hash)
+        except:
+            return [output,False]
+        branch = repo.lookup_branch(Hash[:7])
+        ref = repo.lookup_reference(branch.name)
+        repo.checkout(ref)
+        contents = os.listdir(Path)
+        if (len(contents) != 1):
+            file_name = contents[1]
+            print(contents)
+            actualFileLoc = Path + "/" + file_name
+            f = open(actualFileLoc,"r")
+            output = f.read()
+            f.close()
+        branch = repo.lookup_branch('master')
+        ref = repo.lookup_reference(branch.name)
+        repo.checkout(ref)
+        return [output,True]
+    except Exception as E:
+        print("Repository has failed: get_old_data_from_hash",E)
