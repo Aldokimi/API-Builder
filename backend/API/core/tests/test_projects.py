@@ -52,7 +52,10 @@ class test_case_project_create(APITestCase):
             "name": "Some Project",
             "date_created": "1969-04-20T00:00:00Z",
             "last_updated": "2001-10-22T00:00:00Z",
-            "owner": f"{random_user.id}"
+            "owner": f"{random_user.id}",
+            "file_content": '{"hi":"unhi","hello":"unhello}',
+            "file_type":"json",
+            "file_name":"randomTest"
         }
         
         self.invalid_payload = {
@@ -64,7 +67,10 @@ class test_case_project_create(APITestCase):
             "name": "Some Project",
             "date_created": "1969-04-20T00:00:00Z",
             "last_updated": "2001-10-22T00:00:00Z",
-            "owner": f"{1 if int(random_user.id) == 0 else (int(random_user.id) -1) }"
+            "owner": f"{1 if int(random_user.id) == 0 else (int(random_user.id) -1) }",
+            "file_content":'{"hi":"unhi","hello":"unhello}',
+            "file_type":"json",
+            "file_name":"randomTest"
         }
         
         self.invalid_owner_payload = {
