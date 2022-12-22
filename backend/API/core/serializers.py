@@ -87,6 +87,9 @@ class CreateProjectSerializer(serializers.ModelSerializer):
             'endpoint_name',
             'private',
             'owner',
+            'file_name',
+            'file_content',
+            'file_type',
         ]
 
 class UpdateProjectSerializer(serializers.ModelSerializer):
@@ -100,4 +103,7 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
             'last_updated',
             'endpoint_name',
             'private',
+            'file_name',
+            'file_content',
+            'file_type',
         ]
