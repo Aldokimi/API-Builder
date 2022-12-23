@@ -221,6 +221,7 @@ def get_old_data_from_hash (Hash,Path):
             valid = repo.revparse_single(Hash)
         except:
             return [False,output]
+
         branch = repo.lookup_branch(Hash[:7])
         ref = repo.lookup_reference(branch.name)
         repo.checkout(ref)
