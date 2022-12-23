@@ -12,7 +12,11 @@
             </li>
 
             <li *ngIf="isAuth" class="nav-item">
-                <a id="myApis" class="nav-link text-light" href="/">My APIs</a>
+                <a id="myApis" class="nav-link text-light" href="{{myApiLink}}">My APIs</a>
+            </li>
+            
+            <li *ngIf="isAuth" class="nav-item">
+                <a id="myApis" class="nav-link text-light" href="{{newApiLink}}">New API</a>
             </li>
             
             <li *ngIf="!isAuth" class="nav-item">
@@ -28,9 +32,10 @@
                 <a class="nav-link text-light" href="home" (click) = "logout()">Logout</a>
             </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0 bg-light text-dark" type="submit">Search</button>
+        <form class="form-inline my-2 my-lg-0" >
+            <input class="form-control mr-sm-2"  type="text" [(ngModel)]="searchTerm" placeholder="Search for users" name="searchterm" aria-label="Search">
+            <button    
+            class="btn btn-outline-success my-2 my-sm-0 bg-light text-dark" type="submit"  (click)="search()"><a href="{{searchLink}}"> Search</a></button>
         </form>
         <ul *ngIf="isAuth" class="navbar-nav">
             <li class="nav-item active text-light">

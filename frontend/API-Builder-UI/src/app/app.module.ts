@@ -12,6 +12,7 @@ import { UserModule } from './profiles/user.module';
 import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
 import { ProjectsComponent } from './projects/projects.component';
 import { NewProjectFormComponent } from './projects/new-project-form/new-project-form.component';
+import { ProjectComponent } from './projects/project/project.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { NewProjectFormComponent } from './projects/new-project-form/new-project
     PagenotfoundComponent,
     ProjectsComponent,
     NewProjectFormComponent,
+    ProjectComponent,
   ],
   imports: [
     BrowserModule,

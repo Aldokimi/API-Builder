@@ -8,6 +8,9 @@ import { IsAuthenticatedGuard } from './auth/guards/is-authenticated.guard';
 import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
 import { NewProjectFormComponent } from './projects/new-project-form/new-project-form.component';
 import { AppComponent } from './app.component';
+import { ProjectsComponent } from './projects/projects.component';
+import { ProjectComponent } from './projects/project/project.component';
+import { ProfilesComponent } from './profiles/profiles/profiles.component';
 
 
 export const routes: Routes = [
@@ -40,6 +43,11 @@ export const routes: Routes = [
     //canActivate: [IsAuthenticatedGuard]
   },
   {
+    path: `profiles`,
+    component: ProfilesComponent,
+    canActivate: [IsAuthenticatedGuard]
+  },
+  {
     path: `profiles/:id`,
     component: ProfileComponent,
     canActivate: [IsAuthenticatedGuard]
@@ -51,12 +59,12 @@ export const routes: Routes = [
   },
   {
     path: `profiles/:id/projects`,
-    component: NewProjectFormComponent,
+    component: ProjectsComponent,
     canActivate: [IsAuthenticatedGuard]
   },
   {
-    path: `profiles/:id/projects/:pId`,
-    component: ProfileComponent,
+    path: `profiles/:id/projects/:pid`,
+    component: ProjectComponent,
     canActivate: [IsAuthenticatedGuard]
   },
   //Wild Card Route for 404 request

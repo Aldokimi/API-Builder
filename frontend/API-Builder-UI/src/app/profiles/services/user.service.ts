@@ -18,6 +18,10 @@ export class UserService {
 
   getAllUsers() {
     return this.http.get(`${this.myURL}users/`).pipe(
+      tap(dt=>{
+        console.log(dt);
+        
+      }),
       catchError((error) => {
         console.log(error);
         //this.router.navigate(['home']);
@@ -40,10 +44,7 @@ export class UserService {
 
   
   getUser(id: number|string): Observable<any> {
-    let header = new HttpHeaders().set(
-      'Authorization',
-      `Bearer ${this.getCookie('auth_token')}`
-    );
+   
 
     return this.http.get(`${this.myURL}users/${id}`).pipe(
       

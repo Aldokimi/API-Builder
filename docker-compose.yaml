@@ -7,13 +7,13 @@ services:
   backend:
     container_name: APIBuilder_backend
     image: api-builder-api:latest # Either installed locally or can be pulled from docker hub
-    command: python /backend/API/manage.py runserver 0.0.0.0:8000
+    command: python manage.py /backend/API/migrate --run-syncdb && python /backend/API/manage.py runserver 0.0.0.0:8000
     volumes:
       - /backend
     ports:
       - "8000:8000"
 
-  # Frontend service to run the UI
+  #Frontend service to run the UI
   frontend:
     container_name: APIBuilder_frontend
     image: api-builder-gui:latest

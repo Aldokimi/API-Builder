@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, map, Observable, of, tap } from 'rxjs';
 import { TokenModel } from './../models/token-model';
 import { CookieService } from 'ngx-cookie';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RegisterModel } from '../models/register-model';
 import { User } from 'src/app/profiles/models/user';
 
@@ -25,7 +25,7 @@ export class AuthService {
   get token(){
     return this.getCookie(this.TOKEN_NAME)
   }
-  constructor(private http: HttpClient,private cookieService: CookieService, private router :Router,) {
+  constructor(private http: HttpClient,private cookieService: CookieService, private router :Router,private route: ActivatedRoute) {
     this._isLoggedIn$.next(this.checkSession())
     
   }
@@ -78,7 +78,8 @@ private  hashCode(str:string) :number {
           this.putCookie(this.TOKEN_NAME, JSON.stringify(token.access));
           this._isLoggedIn$.next(this.checkSession());
           this._currentUser$.next(data);
-          this.router.navigate(['home']);
+         
+          this.router.navigate(['home'], {skipLocationChange: true});
         })
         );
         }
