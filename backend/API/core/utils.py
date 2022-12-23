@@ -258,3 +258,13 @@ def handle_filecontent_for_output(FileContent,Type):
         return FileContent
     else:
         return FileContent
+
+
+def give_endpoint(ProjectEmail,ProjectName,ProjectID):
+    '''Returns a temp endpoint for the project'''
+    
+    dic = get_history_of_repo(ProjectEmail,ProjectName)
+    latest = list(dic.values())[0]
+    hash = list(latest.values())[0]
+    endpoint = f"api/projects/{ProjectID}/history/{hash}?format=json"
+    return endpoint

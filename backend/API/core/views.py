@@ -191,6 +191,8 @@ class ProjectList(APIView):
             project_loc = f"/home/API-Builder/{project.validated_data['owner'].email}/{project.validated_data['name']}"
             utils.create_file(project.validated_data['file_content'],project_loc,fileName,project.validated_data['file_type'])
             utils.commit_repo_changes( project.validated_data['owner'].email , project.validated_data['owner'].username ,project.validated_data['name'], f"Project: '{project.validated_data['name']}' initialization" ) 
+            endpoint = utils.give_endpoint(project.validated_data['owner'].email,project.validated_data['name'],(len(Project.objects.all())+1))
+            project.validated_data['endpoint_name'] = endpoint
             project.save()
             return Response(project.data, status=status.HTTP_201_CREATED)
         return Response(project.errors, status=status.HTTP_400_BAD_REQUEST)
