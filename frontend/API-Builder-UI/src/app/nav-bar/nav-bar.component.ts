@@ -10,7 +10,7 @@ import { User } from '../profiles/models/user';
 })
 export class NavBarComponent implements OnInit {
   isAuth!: boolean;
-  currentUser!: User; 
+  currentUser!: any; 
   profileLink!:string;
   constructor(private authService: AuthService, private router:Router) {
     this.authService.isLoggedIn.subscribe((data)=>{
@@ -24,6 +24,9 @@ export class NavBarComponent implements OnInit {
       this.profileLink = `profiles/${this.currentUser.id}`
       } 
     ) ;
+
+
+    
     }
   }
   

@@ -13,10 +13,19 @@
       </div>
       <div class="col-md-2">
         <input
-          type="submit"
+        type = 'submit'
+          (click)='editProfile()'
           class="profile-edit-btn"
           name="btnAddMore"
           value="Edit Profile"
+        /> 
+        <br> <br>
+        <input
+          type = 'submit'
+          (click)='seeProjects()'
+          class="profile-edit-btn"
+          name="seeProjs"
+          value="See Projects"
         />
       </div>
     </div>
@@ -60,10 +69,7 @@
                 <p>{{ userInfo.date_of_birth }}</p>
               </div>
             </div>
-            <div class="row">
-              <div class="col-md-6"><label>Profession</label></div>
-              <div class="col-md-6"><p>Web Developer and Designer</p></div>
-            </div>
+
           </div>
           
         </div>

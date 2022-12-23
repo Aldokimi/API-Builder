@@ -77,7 +77,7 @@ private  hashCode(str:string) :number {
           this.putCookie('userid_h', JSON.stringify(this.hashCode(token.id.toString())));
           this.putCookie(this.TOKEN_NAME, JSON.stringify(token.access));
           this._isLoggedIn$.next(this.checkSession());
-         // window.location.reload();
+          this._currentUser$.next(data);
           this.router.navigate(['home']);
         })
         );
@@ -92,7 +92,6 @@ private  hashCode(str:string) :number {
             `Bearer ${this.getCookie('auth_token')}`
           );
            
-            // console.log(888888888888888888888888888);
             return this.http.get<User>(`${this.myURL}users/${this.getCookie('userid')}`);
             
         

@@ -3,10 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { MainPageComponent } from './main-page/main-page.component';
 import { RegisterPageComponent } from './auth/register-page/register-page.component';
 import { LoginPageComponent } from './auth/login-page/login-page.component';
-//import { IsAuthenticatedGuard } from './auth/guards/is-authenticated.guard';
 import { ProfileComponent } from './profiles/profile/profile.component';
 import { IsAuthenticatedGuard } from './auth/guards/is-authenticated.guard';
 import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
+import { NewProjectFormComponent } from './projects/new-project-form/new-project-form.component';
+import { AppComponent } from './app.component';
 
 
 export const routes: Routes = [
@@ -40,6 +41,21 @@ export const routes: Routes = [
   },
   {
     path: `profiles/:id`,
+    component: ProfileComponent,
+    canActivate: [IsAuthenticatedGuard]
+  },
+  {
+    path: `profiles/:id/projects/new-project`,
+    component: NewProjectFormComponent,
+    canActivate: [IsAuthenticatedGuard]
+  },
+  {
+    path: `profiles/:id/projects`,
+    component: NewProjectFormComponent,
+    canActivate: [IsAuthenticatedGuard]
+  },
+  {
+    path: `profiles/:id/projects/:pId`,
     component: ProfileComponent,
     canActivate: [IsAuthenticatedGuard]
   },

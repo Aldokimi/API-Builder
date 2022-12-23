@@ -31,6 +31,14 @@ export class ProfileComponent implements OnInit {
     })
   }
 
+  editProfile(){
+    this.router.navigate(['home']);
+  }
+
+  seeProjects(){
+    this.router.navigate([`profiles/${this.id}/projects`]);
+  }
+
   ngOnInit(): void {
     
 

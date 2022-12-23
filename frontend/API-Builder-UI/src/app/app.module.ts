@@ -10,6 +10,8 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { CookieModule } from 'ngx-cookie';
 import { UserModule } from './profiles/user.module';
 import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
+import { ProjectsComponent } from './projects/projects.component';
+import { NewProjectFormComponent } from './projects/new-project-form/new-project-form.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +19,8 @@ import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.compon
     MainPageComponent,
     NavBarComponent,
     PagenotfoundComponent,
+    ProjectsComponent,
+    NewProjectFormComponent,
   ],
   imports: [
     BrowserModule,
