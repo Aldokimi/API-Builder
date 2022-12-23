@@ -221,7 +221,6 @@ def get_old_data_from_hash (Hash,Path):
             valid = repo.revparse_single(Hash)
         except:
             return [False,output]
-
         branch = repo.lookup_branch(Hash[:7])
         ref = repo.lookup_reference(branch.name)
         repo.checkout(ref)
@@ -259,3 +258,13 @@ def handle_filecontent_for_output(FileContent,Type):
         return FileContent
     else:
         return FileContent
+
+
+def give_endpoint(ProjectEmail,ProjectName,ProjectID):
+    '''Returns a temp endpoint for the project'''
+    
+    dic = get_history_of_repo(ProjectEmail,ProjectName)
+    latest = list(dic.values())[0]
+    hash = list(latest.values())[0]
+    endpoint = f"api/projects/{ProjectID}/history/{hash}?format=json"
+    return endpoint
