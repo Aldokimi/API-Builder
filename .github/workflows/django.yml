@@ -69,8 +69,8 @@ jobs:
     #     ignore_failure: false
 
     # UPload the artifacts to the build folder
-    - name: Tar files
-      run: mkdir outbuild && tar -cvf build.tar outbuild
+    # - name: Tar files
+    #   run: mkdir outbuild && tar -cvf build.tar outbuild
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
