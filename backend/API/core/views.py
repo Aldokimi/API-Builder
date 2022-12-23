@@ -44,6 +44,7 @@ class LoginView(APIView):
             auth_data['id'] = request.user.id
             auth_data['email'] = request.user.email
             auth_data['username'] = request.user.username
+            auth_data['csrftoken'] = request.META.get('CSRF_COOKIE', None)
             return Response({'msg': 'Login Success', **auth_data}, status=status.HTTP_200_OK)
         return Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -173,13 +174,22 @@ class ProjectList(APIView):
             projects = Project.objects.filter(name=project.validated_data['name'])
             if (len(projects) != 0):
                 return Response({
-                    "message":"Project name exists!", 
-                    **project.validated_data
-                    }, status=status.HTTP_400_BAD_REQUEST)  
+                    "message":"Project name exists!"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                fileName = project.validated_data['file_name']  #User makes the file with a custom name
+            except KeyError:
+                fileName = "swc_"+project.validated_data['owner'].username
+                project.file_name = fileName
+                #Error return incase we decide to have fileName as mandatory
+                #return Response({
+                #    "message":"Project must have a file name!",
+                #    "file_name": ["This field is required."]
+                #}, status=status.HTTP_400_BAD_REQUEST)  
             utils.make_dir_for_project_of_user( project.validated_data['owner'].email , project.validated_data['name'] )
             utils.initialize_localrepo( project.validated_data['owner'].email , project.validated_data['name'] )
             project_loc = f"/home/API-Builder/{project.validated_data['owner'].email}/{project.validated_data['name']}"
-            utils.create_file(project.validated_data['file_content'],project_loc,project.validated_data['file_name'],project.validated_data['file_type'])
+            utils.create_file(project.validated_data['file_content'],project_loc,fileName,project.validated_data['file_type'])
             utils.commit_repo_changes( project.validated_data['owner'].email , project.validated_data['owner'].username ,project.validated_data['name'], f"Project: '{project.validated_data['name']}' initialization" ) 
             project.save()
             return Response(project.data, status=status.HTTP_201_CREATED)
@@ -233,9 +243,9 @@ class ProjectDetail(APIView):
                     else:
                         FileLoc = f"/home/API-Builder/{project.owner.email}/{project.name}"
                     if "file_name" in request.data:
-                        utils.update_file(serializer.validated_data["file_content"],FileLoc,serializer.validated_data["file_name"],serializer.validated_data["file_type"],project.file_name)
+                        utils.update_file(serializer.validated_data["file_content"],FileLoc,serializer.validated_data["file_name"],serializer.validated_data["file_type"],project.file_name,project.file_type)
                     else:
-                        utils.update_file(serializer.validated_data["file_content"],FileLoc,project.file_name,serializer.validated_data["file_type"])
+                        utils.update_file(serializer.validated_data["file_content"],FileLoc,project.file_name,serializer.validated_data["file_type"],project.file_name,project.file_type)
                     name = project.owner.username
                     utils.commit_repo_changes( project.owner.email , name ,project.name ) 
             except Exception as E:
@@ -280,7 +290,8 @@ class ProjectOldDataDetail(APIView):
     """
     Get the old file data of a project
     """
-    #permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated, ]
+
     def get_object(self, pk):
         try:
             return Project.objects.get(pk=pk)
@@ -293,8 +304,10 @@ class ProjectOldDataDetail(APIView):
         if(project.owner.email == request.user.email):
             path = f"/home/API-Builder/{request.user.email}/{project.name}"
             response_data = utils.get_old_data_from_hash(hash, path)
-            if(response_data[1]):
-                return Response(response_data[0],status=status.HTTP_200_OK)
+            if(response_data[0]):
+                #print("Data:",response_data[1])
+                send = utils.handle_filecontent_for_output(response_data[1],response_data[2])
+                return Response(send,status=status.HTTP_200_OK)
             else:
                 return Response({'msg': 'No such hash!'},status=status.HTTP_400_BAD_REQUEST)
         return Response({'msg': 'Unauthorized access!'}, status=status.HTTP_401_UNAUTHORIZED)

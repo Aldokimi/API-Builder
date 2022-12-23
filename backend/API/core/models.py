@@ -86,5 +86,5 @@ class Project(models.Model):
     endpoint_name= models.CharField(max_length=150, null=True)
     private = models.BooleanField(default=False)
     file_name = models.TextField(max_length=4096,null=True)
-    file_content = models.TextField(null=True)
-    file_type = models.CharField(max_length=21,null=True)
+    file_content = models.TextField(null=False)
+    file_type = models.CharField(max_length=21,null=False)
