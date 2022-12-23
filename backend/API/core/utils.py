@@ -3,6 +3,8 @@ import os
 import shutil
 import pygit2
 from datetime import datetime, timezone, timedelta
+import json
+import xml.etree.ElementTree as ET
 
 
 def get_tokens_for_user(user):
@@ -181,13 +183,19 @@ def create_file(FileContent,FileLocation,FileName,FileType):
         print('create_file:',error)
     
 
-def update_file(FileContent,FileLocation,FileName,FileType,OldFileName=None):
+def update_file(FileContent,FileLocation,FileName,FileType,OldFileName=None,OldFileType=None):
     '''Function to update the given file.'''
     
     NewLocation = f"{FileLocation}/{FileName}.{FileType}"
     OldLocation = "place_holder"
-    if (OldFileName):
+    if (OldFileName and OldFileType):
+        OldLocation = f"{FileLocation}/{OldFileName}.{OldFileType}"
+    elif (OldFileName):
         OldLocation = f"{FileLocation}/{OldFileName}.{FileType}"
+    elif(OldFileType):
+        OldLocation = f"{FileLocation}/{FileName}.{OldFileType}"
+    else:
+        raise OSError
     try:
         if(os.path.exists(NewLocation)):
             os.remove(NewLocation)
@@ -204,6 +212,7 @@ def update_file(FileContent,FileLocation,FileName,FileType,OldFileName=None):
         
         
 def get_old_data_from_hash (Hash,Path):
+    '''Function to retrieve old file from a given hash'''
     
     try:
         output = {}
@@ -211,16 +220,18 @@ def get_old_data_from_hash (Hash,Path):
         try:
             valid = repo.revparse_single(Hash)
         except:
-            return [output,False]
+            return [False,output]
         branch = repo.lookup_branch(Hash[:7])
         ref = repo.lookup_reference(branch.name)
         repo.checkout(ref)
         contents = os.listdir(Path)
+        file_name = ""
         if (len(contents) != 1):
             for item in contents:
                 if(os.path.isfile(Path + "/" + item)):
                     file_name = item
                     break
+            file_extension = ((file_name[::-1]).partition(".")[0])[::-1]
             actualFileLoc = Path + "/" + file_name
             f = open(actualFileLoc,"r")
             output = f.read()
@@ -228,6 +239,22 @@ def get_old_data_from_hash (Hash,Path):
         branch = repo.lookup_branch('master')
         ref = repo.lookup_reference(branch.name)
         repo.checkout(ref)
-        return [output,True]
+        return [True,output,file_extension]
     except Exception as E:
         print("Repository has failed: get_old_data_from_hash",E)
+        
+        
+def handle_filecontent_for_output(FileContent,Type):
+    '''Returns file as per its format'''
+    
+    if(Type == "json"):
+        json_object = json.loads(FileContent)
+        return json_object
+    elif(Type == "csv"):
+        #csv_object = "somestuff" #-> needs to be implemented
+        return FileContent
+    elif(Type == "xml"):
+        #xml_object = ET.fromstring(FileContent) #-> returned object in response is displayed as {}
+        return FileContent
+    else:
+        return FileContent
