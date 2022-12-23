@@ -8,12 +8,21 @@ import { AppComponent } from './app.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { CookieModule } from 'ngx-cookie';
+import { UserModule } from './profiles/user.module';
+import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
+import { ProjectsComponent } from './projects/projects.component';
+import { NewProjectFormComponent } from './projects/new-project-form/new-project-form.component';
+import { ProjectComponent } from './projects/project/project.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MainPageComponent,
     NavBarComponent,
+    PagenotfoundComponent,
+    ProjectsComponent,
+    NewProjectFormComponent,
+    ProjectComponent,
   ],
   imports: [
     BrowserModule,
@@ -21,7 +30,8 @@ import { CookieModule } from 'ngx-cookie';
     FormsModule,
     AuthModule,
     ReactiveFormsModule,
-    CookieModule.withOptions()
+    CookieModule.withOptions(),
+    UserModule
   ],
   providers: [],
   bootstrap: [AppComponent]

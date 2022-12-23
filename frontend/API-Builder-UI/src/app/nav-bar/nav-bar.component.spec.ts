@@ -14,7 +14,9 @@ describe('NavBarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NavBarComponent ]
+      declarations: [ NavBarComponent ],
+      imports:[AppModule],
+      providers:[]
     })
     .compileComponents();
 
@@ -45,6 +47,7 @@ describe("Router: App", () => {
 
     fixture = TestBed.createComponent(NavBarComponent);
     router.initialNavigation();
+    
   });
 
   it("fakeAsync works", fakeAsync(() => {
@@ -63,7 +66,7 @@ describe("Router: App", () => {
     });
   }));
 
-  it('navigate to "home" takes you to /search', fakeAsync(() => {
+  it('navigate to "home" takes you to /home', fakeAsync(() => {
     router.navigate(["/home"]).then(() => {
       expect(location.path()).toBe("/home");
     });

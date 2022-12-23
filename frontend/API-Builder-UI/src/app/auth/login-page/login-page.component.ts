@@ -20,6 +20,10 @@ export class LoginPageComponent implements OnInit {
   fieldTextType: boolean = false;
 
   ngOnInit(): void {
+    this.authService.isLoggedIn.subscribe(isLogged => {
+      if (isLogged)
+        this.router.navigate(['home'])
+    })
     this.my_login_form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -34,9 +38,9 @@ export class LoginPageComponent implements OnInit {
      this.authService.login(this.my_login_form.get('email')?.value, this.my_login_form.get('password')?.value)
       .subscribe(
         (response) => {
-        console.log(response);
-        this.API_message = 'Login Success';
 
+        this.API_message = 'Login Success';
+        
         this.isLoading = false;
         }
         ,(errorRes) => {
