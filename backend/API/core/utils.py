@@ -217,8 +217,10 @@ def get_old_data_from_hash (Hash,Path):
         repo.checkout(ref)
         contents = os.listdir(Path)
         if (len(contents) != 1):
-            file_name = contents[1]
-            print(contents)
+            for item in contents:
+                if(os.path.isfile(Path + "/" + item)):
+                    file_name = item
+                    break
             actualFileLoc = Path + "/" + file_name
             f = open(actualFileLoc,"r")
             output = f.read()
