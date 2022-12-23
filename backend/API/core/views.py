@@ -54,7 +54,7 @@ class LogoutView(APIView):
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
 
 class ChangePasswordView(APIView):
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def post(self, request):
         serializer = PasswordChangeSerializer(context={'request': request}, data=request.data)
@@ -87,7 +87,7 @@ class UserDetail(APIView):
     """
     Retrieve, update or delete a user instance.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
     def get_object(self, pk):
         try:
             return User.objects.get(pk=pk)
@@ -146,7 +146,7 @@ class ProjectList(APIView):
     """
     List all projects, or create a new Project.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -202,7 +202,7 @@ class ProjectDetail(APIView):
     """
     Retrieve, update or delete a Project instance.
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -272,7 +272,7 @@ class ProjectHistoryDetail(APIView):
     """
     Get the history data of a project
     """
-    permission_classes = [IsAuthenticated, ]
+    #permission_classes = [IsAuthenticated, ]
     def get_object(self, pk):
         try:
             return Project.objects.get(pk=pk)
@@ -293,6 +293,7 @@ class ProjectOldDataDetail(APIView):
     Get the old file data of a project
     """
     permission_classes = [IsAuthenticated, ]
+
     def get_object(self, pk):
         try:
             return Project.objects.get(pk=pk)
