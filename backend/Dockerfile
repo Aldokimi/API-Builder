@@ -28,7 +28,7 @@ VOLUME /backend
 EXPOSE 8080
 
 CMD python /backend/API/manage.py makemigrations &&\
-    python /backend/API/manage.py migrate &&
+    python /backend/API/manage.py migrate
 
 # docker build -t api-builder-api:latest .
 # To run: docker run -d -p 8000:8000 --name API api-api-builder-api:latest

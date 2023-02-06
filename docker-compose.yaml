@@ -5,8 +5,8 @@ services:
 
   # Backend service to run the backend server
   backend:
-    container_name: APIBuilder_backend
-    image: api-builder-api:latest # Either installed locally or can be pulled from docker hub
+    container_name: API-Builder-backend
+    image: api-builder-api:latest
     command: python manage.py /backend/API/migrate --run-syncdb && python /backend/API/manage.py runserver 0.0.0.0:8000
     volumes:
       - /backend
@@ -15,8 +15,12 @@ services:
 
   #Frontend service to run the UI
   frontend:
-    container_name: APIBuilder_frontend
-    image: api-builder-gui:latest
-    command: ng serve --host 0.0.0.0
+    container_name: API-Builder-frontend
+    image: api-builder-ui:latest
+    command: npm run dev
     ports:
-      - "4200:4200"
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - PORT=5173
+      - HOST=0.0.0.0
