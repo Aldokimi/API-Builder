@@ -23,6 +23,8 @@
     <li>The history of changes over the project will be tracked an you can go back to the data at any state of time!</li>
 <ul>
 
+___
+
 <h2>How to run 🏃🏼‍♀️</h2>
 <p>Currently we don't have CD system so there is no factories, but you still can run the docker.</p>
 <p>So you can run the program as follows:</p>
@@ -41,7 +43,7 @@ docker build -t api-builder-api:latest .
 
 #### Build the project's UI image
 ```bash
-cd fronted/API-Builder-UI
+cd UI
 docker build -t api-builder-gui:latest .
 ```
 
